@@ -10,6 +10,6 @@ lazy val root = (project in file("."))
       "org.ergoplatform" %% "ergo-appkit" % "5.0.1",
     ),
 
-    assembly / assemblyJarName := s"${name.value}-v${version.value}.jar",
-    assembly / assemblyOutputPath := file(s"./${name.value}-v${version.value}.jar/")
+    assembly / assemblyJarName := s"${name.value}-${version.value}.jar",
+    assembly / assemblyOutputPath := file(s"./${name.value}-${version.value}.jar/")
   )

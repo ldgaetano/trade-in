@@ -1,0 +1,23 @@
+{
+  "gameTokenIssuanceBox": {
+    "gameTokenIssuanceContract": "",
+    "gameTokenId": ""
+  },
+  "gameLPIssuanceBox": {
+    "gameLPIssuanceContract": "",
+    "gameLPSingletonTokenId": ""
+  },
+  "gameLPBox": {
+    "gameLPContract": ""
+  },
+  "cardValueMappingIssuanceBox": {
+    "cardValueMappingIssuanceContract": "",
+    "cardValueMappingSingletonTokenId": ""
+  },
+  "cardValueMappingBox": {
+    "cardValueMappingContract": ""
+  },
+  "playerProxyBox": {
+    "playerProxyContract": ""
+  }
+}

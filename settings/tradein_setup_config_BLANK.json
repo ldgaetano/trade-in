@@ -1,0 +1,27 @@
+{
+  "node": {
+    "nodeApi": {
+      "apiUrl": "",
+      "apiKey": ""
+    },
+    "wallet": {
+      "mnemonic": "",
+      "password": ""
+    },
+    "networkType": ""
+  },
+  "settings": {
+    "gameTokenMinting": {
+      "gameTokenName": "",
+      "gameTokenDescription": "",
+      "gameTokenAmount": 42,
+      "gameTokenDecimals": 0,
+      "gameTokenPictureFileName": "",
+      "gameTokenPictureLink": ""
+    },
+    "devAddress": "",
+    "devFeeInGameToken": 1,
+    "txOperatorFeeInGameToken": 2,
+    "minerFeeInNanoERG": 1000000
+  }
+}

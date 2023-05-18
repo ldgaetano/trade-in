@@ -36,7 +36,7 @@ This command will compile all the ErgoScript contracts required for the protocol
 
 #### Transaction Execution
 
-This command will execute all transactions in the setup phase of the protocol. It assumes that you have compiled the ErgoScript contracts already.
+These commands will execute transactions in the setup phase of the protocol. It assumes that you have compiled the ErgoScript contracts already.
 
 1. Run `java -jar trade-in-<version>.jar --execute` to execute all transactions in the protocol.
 2. Run `java -jar trade-in-<version>.jar --mint-game-tokens` to execute the game token mint transaction.

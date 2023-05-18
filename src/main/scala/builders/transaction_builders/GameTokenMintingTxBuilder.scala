@@ -6,6 +6,7 @@ import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, InputBox, OutBox, SecretString, UnsignedTransaction, UnsignedTransactionBuilder}
+import org.ergoplatform.wallet.mnemonic.Mnemonic
 import scorex.crypto.hash
 import scorex.crypto.hash.Sha256
 import utils.TradeInUtils
@@ -46,7 +47,13 @@ object GameTokenMintingTxBuilder {
     val txBuilder: UnsignedTransactionBuilder = ctx.newTxBuilder()
 
     // dev pk
-    val devPK: Address = Address.fromMnemonic(setupConfig.node.networkType, SecretString.create(setupConfig.node.wallet.mnemonic), SecretString.create(""), false)
+    val devPK: Address = Address.createEip3Address(
+      setupConfig.node.wallet.index,
+      setupConfig.node.networkType,
+      SecretString.create(setupConfig.node.wallet.mnemonic),
+      SecretString.create(setupConfig.node.wallet.password),
+      false
+    )
 
     // get the requisite input boxes required
     val inputs: Array[InputBox] = ctx.getDataSource.getUnspentBoxesFor(devPK, 0, 100).asScala.toArray

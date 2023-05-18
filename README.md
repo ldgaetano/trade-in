@@ -7,8 +7,8 @@ Card game token burn and trade-in protocol for Ergo blockchain.
 
 ### Installing
 
-1. Download the latest release to minimize your own risk, or clone/download repository if you are adventurous.
-2. Install Java 18.0.2 (JRE, JDK, or OpenJDK).
+1. Download the latest release.
+2. Install `Java 18.0.2` (JRE, JDK, or OpenJDK).
 3. If you would like to compile the jar yourself, download `sbt` and run `sbt assembly` within the repository folder.
 
 ### Configurations
@@ -38,7 +38,7 @@ This command will compile all the ErgoScript contracts required for the protocol
 
 This command will execute all transactions in the setup phase of the protocol. It assumes that you have compiled the ErgoScript contracts already.
 
-1. Run `java -jar trade-in-<version>.jar --all` to execute all transactions in the protocol.
+1. Run `java -jar trade-in-<version>.jar --execute` to execute all transactions in the protocol.
 2. Run `java -jar trade-in-<version>.jar --mint-game-tokens` to execute the game token mint transaction.
 3. Run `java -jar trade-in-<version>.jar --mint-game-lp-singleton` to execute the game liquidity pool singleton token minting transaction.
 4. Run `java -jar trade-in-<version>.jar --game-lp-creation` to execute the game lp box creation transaction.

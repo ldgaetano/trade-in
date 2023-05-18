@@ -42,7 +42,8 @@ object GameTokenIssuanceContractBuilder {
 
         val lpIssuanceContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPIssuanceBox.gameLPIssuanceContract).toPropositionBytes)
         val lpContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
-        val devPK: ErgoValue[SigmaProp] = ErgoValue.of(Address.fromMnemonic(
+        val devPK: ErgoValue[SigmaProp] = ErgoValue.of(Address.createEip3Address(
+            setupConfig.node.wallet.index,
             setupConfig.node.networkType,
             SecretString.create(setupConfig.node.wallet.mnemonic),
             SecretString.create(setupConfig.node.wallet.password),

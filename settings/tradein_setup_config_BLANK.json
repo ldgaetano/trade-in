@@ -6,7 +6,8 @@
     },
     "wallet": {
       "mnemonic": "",
-      "password": ""
+      "password": "",
+      "index": 0
     },
     "networkType": ""
   },
@@ -22,6 +23,6 @@
     "devAddress": "",
     "devFeeInGameToken": 1,
     "txOperatorFeeInGameToken": 2,
-    "minerFeeInNanoERG": 1000000
+    "minerFeeInNanoERG": 1100000
   }
 }

@@ -1,9 +1,11 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
+import builders.transaction_builders.GameTokenMintingTxBuilder
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
-import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract}
+import org.checkerframework.checker.signedness.qual.Unsigned
+import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, SecretString, SignedTransaction, UnsignedTransaction}
 
 import java.nio.file.{Files, Paths}
 import java.time.{LocalDateTime, ZoneId}
@@ -78,7 +80,38 @@ object TradeInUtils {
    */
   def isLocalNodeApiUrl(apiUrl: String): Boolean = apiUrl.equals(DEFAULT_LOCAL_NODE_MAINNET_API_URL) || apiUrl.equals(DEFAULT_LOCAL_NODE_TESTNET_API_URL)
 
+  def executeGameTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING: GAME TOKEN MINTING TX ==========" + Console.RESET)
+
+    // read the report
+    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+    val reportConfig: TradeInReportConfig = readReportConfigResult.get
+
+    // Build the transaction
+    val unsignedTx: UnsignedTransaction = GameTokenMintingTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
+    val signedTx: SignedTransaction = prover.sign(unsignedTx)
+    val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
+
+    // Print out tx status message
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME TOKEN MINTING TX  ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME TOKEN MINTING TX ==========" + Console.RESET)
+    reportConfig.gameTokenIssuanceBox.txId = txId
+    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
+    // Print tx link to user
+    println(Console.BLUE + s"========== ${TradeInUtils.getTimeStamp("UTC")} VIEW TX IN THE ERGO-EXPLORER WITH THE LINK BELOW ==========" + Console.RESET)
+    if (ctx.getNetworkType.equals(NetworkType.MAINNET)) {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_MAINNET + txId)
+    } else {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_TESTNET + txId)
+    }
+
+  }
+
   def compileContracts(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING CONTRACTS ==========" + Console.RESET)
 
     // compile player proxy contract
     val proxyResult = compilePlayerProxy
@@ -130,6 +163,8 @@ object TradeInUtils {
       println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME TOKEN ISSUANCE CONTRACT ==========" + Console.RESET)
       println(lpResult.get)
     }
+
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED CONTRACTS SUCCESSFULLY ==========" + Console.RESET)
 
   }
 

@@ -1,7 +1,7 @@
 package app
 
 import configs.setup_config.TradeInSetupConfig
-import org.ergoplatform.appkit.{BlockchainContext, ErgoClient, NetworkType, RestApiErgoClient}
+import org.ergoplatform.appkit.{BlockchainContext, ErgoClient, ErgoProver, NetworkType, RestApiErgoClient, SecretString}
 import utils.TradeInUtils
 
 import scala.sys.exit
@@ -35,27 +35,46 @@ object TradeIn {
 
       ergoClient.execute((ctx: BlockchainContext) => {
 
-        if (txType.equals("--compile")) {
+        // Setup prover
+        val prover: ErgoProver = ctx.newProverBuilder()
+          .withMnemonic(
+          SecretString.create(setupConfig.node.wallet.mnemonic),
+          SecretString.create(setupConfig.node.wallet.password),
+          false
+          )
+          .withEip3Secret(setupConfig.node.wallet.index)
+          .build()
+
+        if (txType.equals("--trade-in-setup")) {
 
           // Compile contracts
-          println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING CONTRACTS ==========" + Console.RESET)
           TradeInUtils.compileContracts(setupConfig, ctx)
-          println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED CONTRACTS SUCCESSFULLY ==========" + Console.RESET)
+
+          // Execute all transactions
+
+        } else if (txType.equals("--compile")) {
+
+          // Compile contracts
+          TradeInUtils.compileContracts(setupConfig, ctx)
+
+        } else if (txType.equals("--execute")) {
+
+          // Execute all transactions
+
+        } else if (txType.equals("--mint-game-tokens")) {
+
+          // Execute game token minting transaction
+          TradeInUtils.executeGameTokenMinting(setupConfig, ctx, prover)
+
+        } else {
+
+          throw new IllegalArgumentException("invalid command")
 
         }
 
-
-
-//        // Execute transactions
-//        if (txType.equals("--all")) {
-//          // execute all transactions
-//        } else if (txType.equals("--mint-game-tokens")) {
-//
-//          // execute mint game tokens transaction
-//
-//        }
-
       })
+
+      exit(0)
 
     } else {
 

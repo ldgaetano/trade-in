@@ -82,7 +82,7 @@ object TradeInUtils {
 
   def executeGameTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING: GAME TOKEN MINTING TX ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: GAME TOKEN MINTING ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -94,8 +94,8 @@ object TradeInUtils {
     val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
 
     // Print out tx status message
-    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME TOKEN MINTING TX  ==========" + Console.RESET)
-    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME TOKEN MINTING TX ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME TOKEN MINTING ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME TOKEN MINTING ==========" + Console.RESET)
     reportConfig.gameTokenIssuanceBox.txId = txId
     TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
@@ -158,9 +158,9 @@ object TradeInUtils {
     // compile game token issuance contract
     val gameTokenIssuanceResult = compileGameTokenIssuance
     if (gameTokenIssuanceResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE CONTRACT ==========" + Console.RESET)
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE ==========" + Console.RESET)
     } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME TOKEN ISSUANCE CONTRACT ==========" + Console.RESET)
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME TOKEN ISSUANCE ==========" + Console.RESET)
       println(lpResult.get)
     }
 
@@ -170,7 +170,7 @@ object TradeInUtils {
 
   def compileGameTokenIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME TOKEN ISSUANCE CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME TOKEN ISSUANCE ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -187,7 +187,7 @@ object TradeInUtils {
 
   def compileGameLPIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ISSUANCE ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -204,7 +204,7 @@ object TradeInUtils {
 
   def compileGameLP(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -221,7 +221,7 @@ object TradeInUtils {
 
   def compileCardValueMappingIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ISSUANCE CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ISSUANCE ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -238,7 +238,7 @@ object TradeInUtils {
 
   def compileCardValueMapping(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ==========" + Console.RESET)
 
     // read the report
     val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
@@ -255,7 +255,7 @@ object TradeInUtils {
 
   def compilePlayerProxy(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: PLAYER PROXY CONTRACT ==========" + Console.RESET)
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: PLAYER PROXY ==========" + Console.RESET)
 
     val contract: ErgoContract = PlayerProxyContractBuilder(setupConfig).toErgoContract
     val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString

@@ -28,7 +28,7 @@
     // $DevPK: SigmaProp
     // $MinerFee: Long
 
-    // ===== Context Variables (#) ===== //
+    // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //

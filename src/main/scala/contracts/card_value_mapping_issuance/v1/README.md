@@ -31,5 +31,5 @@ Registers:
 - $DevPK: SigmaProp
 - $MinerFee: Long
 
-### Context Variables (#)
+### Context Variables (_)
 - None

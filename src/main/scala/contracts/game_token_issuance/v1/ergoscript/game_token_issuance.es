@@ -29,7 +29,7 @@
     // $DevAddress: Coll[Byte]
     // $MinerFee: Long
 
-    // ===== Context Variables (#) ===== //
+    // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //

@@ -36,7 +36,7 @@
     // $TxOperatorFee: Long
     // $MinBoxValue: Long
 
-    // ===== Context Variables (#) ===== //
+    // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //

@@ -28,9 +28,9 @@ case class GameTokenIssuanceBoxBuilder(
 
 object GameTokenIssuanceBoxBuilder {
 
-  def apply(input: InputBox, networkType: NetworkType): GameTokenIssuanceBoxBuilder = {
+  def apply(input: InputBox, networkType: NetworkType): GameLPIssuanceBoxBuilder = {
 
-    GameTokenIssuanceBoxBuilder(
+    GameLPIssuanceBoxBuilder(
       input.getValue,
       Address.fromErgoTree(input.getErgoTree, networkType).toErgoContract,
       input.getTokens.get(0).asInstanceOf[Eip4Token],

@@ -33,5 +33,5 @@ Registers:
 - $DevAddress: Coll[Byte]
 - $MinerFee: Long
 
-### Context Variables (#)
+### Context Variables (_)
 - None

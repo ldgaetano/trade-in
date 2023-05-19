@@ -47,7 +47,7 @@ object CardValueMappingIssuanceContractBuilder {
 
         new CardValueMappingIssuanceContractBuilder(
             cardValueMappingContract,
-            TradeInUtils.SAFE_STORAGE_RENT_VALUE,
+            TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears),
             devPK,
             setupConfig.settings.minerFeeInNanoERG
         )

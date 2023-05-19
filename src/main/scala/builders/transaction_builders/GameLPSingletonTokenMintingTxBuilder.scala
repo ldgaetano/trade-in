@@ -1,7 +1,7 @@
 package builders.transaction_builders
 
 import builders.box_builders.GameLPIssuanceBoxBuilder
-import builders.contract_builders.GameTokenIssuanceContractBuilder
+import builders.contract_builders.{GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder}
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
@@ -14,14 +14,14 @@ import java.io.File
 import java.nio.file.Files
 import scala.collection.JavaConverters._
 
-case class GameTokenMintingTxBuilder(
-                                    devPKBoxes: Array[InputBox],
-                                    gameTokenIssuanceBox: OutBox,
-                                    changeAddress: Address,
-                                    minerFee: Long,
+case class GameLPSingletonTokenMintingTxBuilder(
+                                      devPKBoxes: Array[InputBox],
+                                      gameLPIssuance: OutBox,
+                                      changeAddress: Address,
+                                      minerFee: Long,
                                     ) extends EIP4TokenMintingTxBuilder {
 
-  override val eip4IssuanceBox: OutBox = gameTokenIssuanceBox
+  override val eip4IssuanceBox: OutBox = gameLPIssuance
   override val txFee: Long = minerFee
 
   override def build(implicit txBuilder: UnsignedTransactionBuilder): UnsignedTransaction = {
@@ -37,7 +37,7 @@ case class GameTokenMintingTxBuilder(
 
 }
 
-object GameTokenMintingTxBuilder {
+object GameLPSingletonTokenMintingTxBuilder {
 
   def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig)(implicit ctx: BlockchainContext): GameLPSingletonTokenMintingTxBuilder = {
 
@@ -57,33 +57,28 @@ object GameTokenMintingTxBuilder {
     val inputs: Array[InputBox] = ctx.getDataSource.getUnspentBoxesFor(devPK, 0, 100).asScala.toArray
 
     // game token issuance box value
-    val issuanceBoxValue: Long = setupConfig.settings.minerFeeInNanoERG
+    val issuanceBoxValue: Long = TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears)
 
     // create the game token issuance box contract
-    val issuanceContract: ErgoContract = GameTokenIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-
-    // game token picture content hash
-    val picFile: File = new File(TradeInUtils.TRADEIN_GAME_TOKEN_IMG_DIRECTORY_PATH + setupConfig.settings.gameTokenMinting.gameTokenPictureFileName)
-    val picBytes: Array[Byte] = Files.readAllBytes(picFile.toPath)
-    val picHash: hash.Digest32 = Sha256.hash(picBytes)
+    val issuanceContract: ErgoContract = GameLPIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
 
     // create the game token
-    val gameToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
+    val lpToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
       inputs(0).getId.toString,
-      setupConfig.settings.gameTokenMinting.gameTokenAmount,
-      setupConfig.settings.gameTokenMinting.gameTokenName,
-      setupConfig.settings.gameTokenMinting.gameTokenDescription,
-      setupConfig.settings.gameTokenMinting.gameTokenDecimals,
-      picHash,
-      setupConfig.settings.gameTokenMinting.gameTokenPictureLink
+      1,
+      "Trade-In_" + setupConfig.settings.gameTokenMinting.gameTokenName + "_LP_Singleton_Token",
+      "Trade-In protocol game liquidity pool singleton token for " + setupConfig.settings.gameTokenMinting.gameTokenName,
+      0,
+      Array(),
+      ""
     )
 
     // write to the report
-    reportConfig.gameTokenIssuanceBox.gameTokenId = gameToken.getId.toString
+    reportConfig.gameLPIssuanceBox.gameLPSingletonTokenId = lpToken.getId.toString
     TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // create the game token issuance box
-    val issuance: OutBox = GameLPIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, gameToken).toOutBox(txBuilder.outBoxBuilder())
+    val issuance: OutBox = GameLPIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, lpToken).toOutBox(txBuilder.outBoxBuilder())
 
     // miner fee
     val minerFee: Long = setupConfig.settings.minerFeeInNanoERG

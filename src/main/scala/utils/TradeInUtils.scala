@@ -1,11 +1,10 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
-import builders.transaction_builders.GameTokenMintingTxBuilder
+import builders.transaction_builders.{GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
-import org.checkerframework.checker.signedness.qual.Unsigned
-import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, SecretString, SignedTransaction, UnsignedTransaction}
+import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, OutBox, SignedTransaction, UnsignedTransaction}
 
 import java.nio.file.{Files, Paths}
 import java.time.{LocalDateTime, ZoneId}
@@ -41,9 +40,36 @@ object TradeInUtils {
   final val CARD_VALUE_MAPPING_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/card_value_mapping/v1/ergoscript/card_value_mapping.es")).stripMargin
   final val PLAYER_PROXY_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/player_proxy/v1/ergoscript/player_proxy.es")).stripMargin
 
-  // Box Values
-  final val SAFE_STORAGE_RENT_VALUE: Long = 1000000000L
-  final val MIN_BOX_VALUE: Long = 1000000L
+  // Box Values: nanoERGs
+  final val STORAGE_RENT_FEE_PERIOD_IN_YEARS: Long = 4L
+  final val STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS: Long = 1250000L
+  final val STORAGE_RENT_FEE_PER_BYTE_PER_YEAR: Long = STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS / STORAGE_RENT_FEE_PERIOD_IN_YEARS
+  final val MIN_BOX_VALUE_PER_BYTE: Long = 360L
+
+  def calcMinBoxValue(): Long = {
+
+    // For simplicity, just assume the box has the max size, conservative fee value
+    val maxBoxSize: Int = 4096
+    MIN_BOX_VALUE_PER_BYTE * maxBoxSize
+
+  }
+
+  def calcSafeStorageRentValue(lifetime: Long): Long = {
+
+    // we just assume max box size for simplicity and to be conservative
+    val maxBoxSize: Int = 4096
+
+    if (lifetime < STORAGE_RENT_FEE_PERIOD_IN_YEARS) {
+
+      MIN_BOX_VALUE_PER_BYTE * maxBoxSize
+
+    } else {
+
+      STORAGE_RENT_FEE_PER_BYTE_PER_YEAR * lifetime * maxBoxSize
+
+    }
+
+  }
 
   // Network Info
   final val ERGO_EXPLORER_TX_URL_PREFIX_MAINNET: String = "https://explorer.ergoplatform.com/en/transactions/"
@@ -79,6 +105,35 @@ object TradeInUtils {
    * @return The boolean value if the api url matched the local node url
    */
   def isLocalNodeApiUrl(apiUrl: String): Boolean = apiUrl.equals(DEFAULT_LOCAL_NODE_MAINNET_API_URL) || apiUrl.equals(DEFAULT_LOCAL_NODE_TESTNET_API_URL)
+
+  def executeGameLPSingletonTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
+
+    // read the report
+    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+    val reportConfig: TradeInReportConfig = readReportConfigResult.get
+
+    // Build the transaction
+    val unsignedTx: UnsignedTransaction = GameLPSingletonTokenMintingTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
+    val signedTx: SignedTransaction = prover.sign(unsignedTx)
+    val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
+
+    // Print out tx status message
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
+    reportConfig.gameTokenIssuanceBox.txId = txId
+    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
+    // Print tx link to user
+    println(Console.BLUE + s"========== ${TradeInUtils.getTimeStamp("UTC")} VIEW TX IN THE ERGO-EXPLORER WITH THE LINK BELOW ==========" + Console.RESET)
+    if (ctx.getNetworkType.equals(NetworkType.MAINNET)) {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_MAINNET + txId)
+    } else {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_TESTNET + txId)
+    }
+
+  }
 
   def executeGameTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
 

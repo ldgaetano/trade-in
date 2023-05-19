@@ -21,6 +21,7 @@
       "gameTokenPictureLink": ""
     },
     "devAddress": "",
+    "protocolPeriodInYears": 10,
     "devFeeInGameToken": 1,
     "txOperatorFeeInGameToken": 2,
     "minerFeeInNanoERG": 1100000

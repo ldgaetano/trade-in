@@ -44,7 +44,7 @@ object GameLPContractBuilder {
             playerProxyContract,
             setupConfig.settings.devFeeInGameToken,
             setupConfig.settings.txOperatorFeeInGameToken,
-            TradeInUtils.MIN_BOX_VALUE
+            TradeInUtils.calcMinBoxValue()
         )
 
     }

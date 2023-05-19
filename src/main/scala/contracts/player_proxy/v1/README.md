@@ -18,6 +18,7 @@ Registers:
 - R5: Coll[Byte] GameLPSingletonTokenId
 - R6: Coll[Byte] GameTokenId
 - R7: Coll[Byte] CardValueMappingSingletonTokenId
+- R8: Long       MinerFee
 
 ### Relevant Transactions
 1. Trade-In Tx
@@ -27,11 +28,11 @@ Registers:
 - Context Variables: CardTokenIssuerBox, CardSetCollectionIssuerBox
 
 ### Compile Time Constants ($)
-- $MinerFee
+- None
 
-### Context Variables (#)
-- #CardTokenIssuerBox: Box
-- #CardSetCollectionIssuerBox: Box
+### Context Variables (_)
+- _CardTokenIssuerBox: Box
+- _CardSetCollectionIssuerBox: Box
 
 ### User Defined Functions
 - def selectRegister(bucket: Byte): Coll[(Coll[Byte], Long)]

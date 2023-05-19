@@ -39,6 +39,7 @@ object GameLPIssuanceContractBuilder {
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): GameLPIssuanceContractBuilder = {
 
         val lpContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
+
         val devPK: ErgoValue[SigmaProp] = ErgoValue.of(Address.createEip3Address(
             setupConfig.node.wallet.index,
             setupConfig.node.networkType,
@@ -46,11 +47,12 @@ object GameLPIssuanceContractBuilder {
             SecretString.create(setupConfig.node.wallet.password),
             false
         ).getSigmaBoolean)
+
         val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes)
 
         new GameLPIssuanceContractBuilder(
             lpContract,
-            TradeInUtils.SAFE_STORAGE_RENT_VALUE,
+            TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears),
             devPK,
             devAddress,
             setupConfig.settings.minerFeeInNanoERG

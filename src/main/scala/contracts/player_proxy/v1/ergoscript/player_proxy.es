@@ -16,6 +16,7 @@
     // R5: Coll[Byte] GameLPSingletonTokenId
     // R6: Coll[Byte] GameTokenId
     // R7: Coll[Byte] CardValueMappingSingletonTokenId
+    // R8: Long       MinerFee
 
     // ===== Relevant Transactions ===== //
     // 1. Trade-In Tx
@@ -25,7 +26,7 @@
     // Context Variables: CardTokenIssuerBox, CardSetCollectionIssuerBox
     
     // ===== Compile Time Constants ($) ===== //
-    // $MinerFee
+    // None
 
     // ===== Context Variables (_) ===== //
     // _CardTokenIssuerBox: Box
@@ -40,6 +41,7 @@
     val gameLPSingletonTokenId: Coll[Byte] = SELF.R5[Coll[Byte]].get
     val gameTokenId: Coll[Byte] = SELF.R6[Coll[Byte]].get
     val cardValueMappingSingletonTokenId: Coll[Byte] = SELF.R7[Coll[Byte]].get
+    val minerFee: Long = SELF.R8[Long].get
 
     // ===== User Defined Functions ===== //
     def selectRegister(bucket: Byte): Coll[(Coll[Byte], Long)] = {
@@ -234,7 +236,7 @@
 
             }
 
-            val validMinerFeeBoxOUT: Boolean = (minerFeeBoxOUT.value == $MinerFee)
+            val validMinerFeeBoxOUT: Boolean = (minerFeeBoxOUT.value == minerFee)
 
             allOf(Coll(
                 validPlayerPKBoxOUT,

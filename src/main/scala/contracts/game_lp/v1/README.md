@@ -36,5 +36,5 @@ Registers:
 - $TxOperatorFee: Long
 - $MinBoxValue: Long
 
-### Context Variables (#)
+### Context Variables (_)
 - None

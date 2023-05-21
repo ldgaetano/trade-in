@@ -38,7 +38,9 @@ object GameLPContractBuilder {
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): GameLPContractBuilder = {
 
         val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBox.cardValueMappingContract).toPropositionBytes)
+
         val playerProxyContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.playerProxyBox.playerProxyContract).toPropositionBytes)
+
         new GameLPContractBuilder(
             cardValueMappingContract,
             playerProxyContract,

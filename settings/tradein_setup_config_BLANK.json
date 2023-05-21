@@ -20,6 +20,10 @@
       "gameTokenPictureFileName": "",
       "gameTokenPictureLink": ""
     },
+    "gameLPBoxCreation": {
+      "emissionInterval": 100,
+      "emissionReductionFactorMultiplier": 2
+    },
     "devAddress": "",
     "protocolPeriodInYears": 10,
     "devFeeInGameToken": 1,

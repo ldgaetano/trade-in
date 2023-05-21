@@ -17,19 +17,20 @@ import scala.collection.JavaConverters._
 case class GameLPSingletonTokenMintingTxBuilder(
                                       devPKBoxes: Array[InputBox],
                                       gameLPIssuance: OutBox,
-                                      changeAddress: Address,
+                                      devPKAddress: Address,
                                       minerFee: Long,
                                     ) extends EIP4TokenMintingTxBuilder {
 
   override val eip4IssuanceBox: OutBox = gameLPIssuance
   override val txFee: Long = minerFee
+  override val changeAddress: Address = devPKAddress
 
   override def build(implicit txBuilder: UnsignedTransactionBuilder): UnsignedTransaction = {
 
     txBuilder
       .addInputs(devPKBoxes:_*)
       .addOutputs(eip4IssuanceBox)
-      .fee(minerFee)
+      .fee(txFee)
       .sendChangeTo(changeAddress)
       .build()
 

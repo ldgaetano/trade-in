@@ -1,7 +1,7 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
-import builders.transaction_builders.{GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
+import builders.transaction_builders.{GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, OutBox, SignedTransaction, UnsignedTransaction}
@@ -65,7 +65,9 @@ object TradeInUtils {
 
     } else {
 
-      STORAGE_RENT_FEE_PER_BYTE_PER_YEAR * lifetime * maxBoxSize
+      val txFee: Long = MIN_BOX_VALUE_PER_BYTE / STORAGE_RENT_FEE_PERIOD_IN_YEARS
+
+      (STORAGE_RENT_FEE_PER_BYTE_PER_YEAR + txFee) * lifetime * maxBoxSize
 
     }
 
@@ -106,6 +108,36 @@ object TradeInUtils {
    */
   def isLocalNodeApiUrl(apiUrl: String): Boolean = apiUrl.equals(DEFAULT_LOCAL_NODE_MAINNET_API_URL) || apiUrl.equals(DEFAULT_LOCAL_NODE_TESTNET_API_URL)
 
+  def executeGameLPBoxCreation(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: GAME LP BOX CREATION ==========" + Console.RESET)
+
+    // read the report
+    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+    val reportConfig: TradeInReportConfig = readReportConfigResult.get
+
+    // Build the transaction
+    val unsignedTx: UnsignedTransaction = GameLPBoxCreationTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
+    val signedTx: SignedTransaction = prover.sign(unsignedTx)
+    val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
+
+    // Print out tx status message
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME LP BOX CREATION ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME LP BOX CREATION ==========" + Console.RESET)
+
+    reportConfig.gameLPBox.txId = txId
+    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
+    // Print tx link to user
+    println(Console.BLUE + s"========== ${TradeInUtils.getTimeStamp("UTC")} VIEW TX IN THE ERGO-EXPLORER WITH THE LINK BELOW ==========" + Console.RESET)
+    if (ctx.getNetworkType.equals(NetworkType.MAINNET)) {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_MAINNET + txId)
+    } else {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_TESTNET + txId)
+    }
+
+  }
+
   def executeGameLPSingletonTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
 
     println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
@@ -122,7 +154,8 @@ object TradeInUtils {
     // Print out tx status message
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME LP SINGLETON TOKEN MINTING ==========" + Console.RESET)
-    reportConfig.gameTokenIssuanceBox.txId = txId
+    reportConfig.gameLPIssuanceBox.boxId = signedTx.getOutputsToSpend.get(0).getId.toString
+    reportConfig.gameLPIssuanceBox.txId = txId
     TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // Print tx link to user
@@ -151,6 +184,7 @@ object TradeInUtils {
     // Print out tx status message
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: GAME TOKEN MINTING ==========" + Console.RESET)
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: GAME TOKEN MINTING ==========" + Console.RESET)
+    reportConfig.gameTokenIssuanceBox.boxId = signedTx.getOutputsToSpend.get(0).getId.toString
     reportConfig.gameTokenIssuanceBox.txId = txId
     TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 

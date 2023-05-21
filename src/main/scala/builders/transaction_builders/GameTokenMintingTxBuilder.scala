@@ -17,19 +17,20 @@ import scala.collection.JavaConverters._
 case class GameTokenMintingTxBuilder(
                                     devPKBoxes: Array[InputBox],
                                     gameTokenIssuanceBox: OutBox,
-                                    changeAddress: Address,
+                                    devPKAddress: Address,
                                     minerFee: Long,
                                     ) extends EIP4TokenMintingTxBuilder {
 
   override val eip4IssuanceBox: OutBox = gameTokenIssuanceBox
   override val txFee: Long = minerFee
+  override val changeAddress: Address = devPKAddress
 
   override def build(implicit txBuilder: UnsignedTransactionBuilder): UnsignedTransaction = {
 
     txBuilder
       .addInputs(devPKBoxes:_*)
       .addOutputs(eip4IssuanceBox)
-      .fee(minerFee)
+      .fee(txFee)
       .sendChangeTo(changeAddress)
       .build()
 
@@ -78,12 +79,14 @@ object GameTokenMintingTxBuilder {
       setupConfig.settings.gameTokenMinting.gameTokenPictureLink
     )
 
-    // write to the report
-    reportConfig.gameTokenIssuanceBox.gameTokenId = gameToken.getId.toString
-    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
 
     // create the game token issuance box
     val issuance: OutBox = GameLPIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, gameToken).toOutBox(txBuilder.outBoxBuilder())
+
+    // write to the report
+    reportConfig.gameTokenIssuanceBox.gameTokenId = gameToken.getId.toString
+    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // miner fee
     val minerFee: Long = setupConfig.settings.minerFeeInNanoERG

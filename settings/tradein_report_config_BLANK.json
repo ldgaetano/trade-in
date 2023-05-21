@@ -2,11 +2,13 @@
   "gameTokenIssuanceBox": {
     "gameTokenIssuanceContract": "",
     "gameTokenId": "",
+    "boxId": "",
     "txId": ""
   },
   "gameLPIssuanceBox": {
     "gameLPIssuanceContract": "",
     "gameLPSingletonTokenId": "",
+    "boxId": "",
     "txId": ""
   },
   "gameLPBox": {
@@ -16,10 +18,12 @@
   "cardValueMappingIssuanceBox": {
     "cardValueMappingIssuanceContract": "",
     "cardValueMappingSingletonTokenId": "",
+    "boxId": "",
     "txId": ""
   },
   "cardValueMappingBox": {
     "cardValueMappingContract": "",
+    "boxId": "",
     "txId": ""
   },
   "playerProxyBox": {

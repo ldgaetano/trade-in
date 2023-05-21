@@ -28,15 +28,20 @@ case class GameTokenIssuanceBoxBuilder(
 
 object GameTokenIssuanceBoxBuilder {
 
-  def apply(input: InputBox, networkType: NetworkType): GameLPIssuanceBoxBuilder = {
+  def apply(input: InputBox)(implicit ctx: BlockchainContext): Option[GameTokenIssuanceBoxBuilder] = {
 
-    GameLPIssuanceBoxBuilder(
-      input.getValue,
-      Address.fromErgoTree(input.getErgoTree, networkType).toErgoContract,
-      input.getTokens.get(0).asInstanceOf[Eip4Token],
-    )
+    if (input.getTokens.size() == 1) {
+
+      Some(GameTokenIssuanceBoxBuilder(
+        input.getValue,
+        Address.fromErgoTree(input.getErgoTree, ctx.getNetworkType).toErgoContract,
+        input.getTokens.get(0).asInstanceOf[Eip4Token],
+      ))
+
+    } else {
+      None
+    }
 
   }
-
 
 }

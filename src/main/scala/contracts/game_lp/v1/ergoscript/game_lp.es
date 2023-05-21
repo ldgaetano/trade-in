@@ -41,7 +41,6 @@
 
     // ===== Relevant Variables ===== //
     val gameLPSingletonToken: (Coll[Byte], Long) = SELF.tokens(0)
-    val gameTokens: (Coll[Byte], Long) = SELF.tokens(1)
     val devAddress: Coll[Byte] = SELF.R4[Coll[Byte]].get
     val emissionInterval: Long = SELF.R5[Long].get
     val emissionReductionFactorMultiplier: Long = SELF.R6[Long].get
@@ -79,7 +78,7 @@
             val cardValueMappingGameTokenId: Coll[Byte] = cardValueMappingBoxData._2._1
 
             val validContract: Boolean = (cardValueMappingBoxIN.propositionBytes == $CardValueMappingContractBytes)
-            val validGameTokenId: Boolean = if (SELF.tokens.size == 2) (cardValueMappingGameTokenId == gameTokens._1) else false
+            val validGameTokenId: Boolean = if (SELF.tokens.size == 2) (cardValueMappingGameTokenId == SELF.tokens(1)._1) else false
 
             allOf(Coll(
                 validContract,
@@ -98,13 +97,19 @@
                 val validGameLPSingletonToken: Boolean = (gameLPBoxOUT.tokens(0) == (gameLPSingletonToken._1, 1L))
                 val validGameTokens: Boolean = {
 
-                    val validTokenId: Boolean = (gameLPBoxOUT.tokens(1)._1 == gameTokens._1)
-                    val validTokenAmount: Boolean = if (gameLPBoxOUT.tokens.size == 2) (gameLPBoxOUT.tokens(1)._2 == gameTokens._2 - playerPKBoxOUT.tokens(0)._2 - devAddressBoxOUT.tokens(0)._2 - txOperatorBoxOUT.tokens(0)._2) else (gameLPBoxOUT.tokens.size == 1) // Cannot deposit to the Game LP box, can only withdraw from it.    
+                    if (SELF.tokens.size == 2) {
 
-                    allOf(Coll(
-                        validTokenId,
-                        validTokenAmount
-                    ))
+                        val validTokenId: Boolean = if (gameLPBoxOUT.tokens.size == 2) (gameLPBoxOUT.tokens(1)._1 == SELF.tokens(1)._1) else (gameLPBoxOUT.tokens.size == 1)
+                        val validTokenAmount: Boolean = if (gameLPBoxOUT.tokens.size == 2) (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - playerPKBoxOUT.tokens(0)._2 - devAddressBoxOUT.tokens(0)._2 - txOperatorBoxOUT.tokens(0)._2) else (gameLPBoxOUT.tokens.size == 1) // Cannot deposit to the Game LP box, can only withdraw from it.
+
+                        allOf(Coll(
+                            validTokenId,
+                            validTokenAmount
+                        ))
+
+                    } else {
+                        false
+                    }
 
                 }
 
@@ -150,7 +155,7 @@
 
             val validValue: Boolean = (devAddressBoxOUT.value == $MinBoxValue)
             val validContract: Boolean = (devAddressBoxOUT.propositionBytes == devAddress)
-            val validToken: Boolean = (devAddressBoxOUT.tokens(0) == (gameTokens._1, $DevFee))
+            val validToken: Boolean = (devAddressBoxOUT.tokens(0) == (SELF.tokens(1)._1, $DevFee))
 
             allOf(Coll(
                 validValue,
@@ -163,7 +168,7 @@
         val validTxOperatorBoxOUT: Boolean = {
 
             val validValue: Boolean = (txOperatorBoxOUT.value == $MinBoxValue)
-            val validToken: Boolean = (txOperatorBoxOUT.tokens(0) == (gameTokens._1, $TxOperatorFee))
+            val validToken: Boolean = (txOperatorBoxOUT.tokens(0) == (SELF.tokens(1)._1, $TxOperatorFee))
 
             allOf(Coll(
                 validValue,

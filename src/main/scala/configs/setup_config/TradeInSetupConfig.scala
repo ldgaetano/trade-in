@@ -2,14 +2,14 @@ package configs.setup_config
 
 import com.google.gson.{Gson, GsonBuilder}
 import configs.setup_config.node.TradeInNodeConfig
-import configs.setup_config.settings.TradeInSetttingsConfig
+import configs.setup_config.settings.TradeInSettingsConfig
 
 import java.io.{File, FileReader}
 import scala.util.Try
 
 case class TradeInSetupConfig(
                         node: TradeInNodeConfig,
-                        settings: TradeInSetttingsConfig
+                        settings: TradeInSettingsConfig
                         )
 
 object TradeInSetupConfig {

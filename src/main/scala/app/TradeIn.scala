@@ -53,6 +53,7 @@ object TradeIn {
           // Execute all transactions
           TradeInUtils.executeGameTokenMinting(setupConfig, ctx, prover)
           TradeInUtils.executeGameLPSingletonTokenMinting(setupConfig, ctx, prover)
+          TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
 
         } else if (txType.equals("--compile")) {
 
@@ -64,6 +65,7 @@ object TradeIn {
           // Execute all transactions
           TradeInUtils.executeGameTokenMinting(setupConfig, ctx, prover)
           TradeInUtils.executeGameLPSingletonTokenMinting(setupConfig, ctx, prover)
+          TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
 
         } else if (txType.equals("--mint-game-tokens")) {
 
@@ -73,6 +75,10 @@ object TradeIn {
         } else if (txType.equals("--mint-game-lp-singleton-token")) {
 
           TradeInUtils.executeGameLPSingletonTokenMinting(setupConfig, ctx, prover)
+
+        } else if (txType.equals("--game-lp-creation")) {
+
+          TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
 
         } else {
 

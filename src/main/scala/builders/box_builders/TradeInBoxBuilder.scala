@@ -1,6 +1,6 @@
 package builders.box_builders
 
-import org.ergoplatform.appkit.{ErgoContract, InputBox, NetworkType, OutBox, OutBoxBuilder, UnsignedTransactionBuilder}
+import org.ergoplatform.appkit.{BlockchainContext, ErgoContract, InputBox, NetworkType, OutBox, OutBoxBuilder, UnsignedTransactionBuilder}
 
 trait TradeInBoxBuilder {
 

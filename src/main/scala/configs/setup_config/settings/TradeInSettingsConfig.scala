@@ -1,7 +1,8 @@
 package configs.setup_config.settings
 
-case class TradeInSetttingsConfig(
+case class TradeInSettingsConfig(
                                gameTokenMinting: TradeInGameTokenMintingConfig,
+                               gameLPBoxCreation: TradeInGameLPBoxCreationConfig,
                                devAddress: String,
                                protocolPeriodInYears: Long,
                                devFeeInGameToken: Long,

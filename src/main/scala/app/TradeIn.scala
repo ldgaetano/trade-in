@@ -45,27 +45,10 @@ object TradeIn {
           .withEip3Secret(setupConfig.node.wallet.index)
           .build()
 
-        if (txType.equals("--trade-in-setup")) {
+        if (txType.equals("--compile")) {
 
           // Compile contracts
           TradeInUtils.compileContracts(setupConfig, ctx)
-
-          // Execute all transactions
-          TradeInUtils.executeGameTokenMinting(setupConfig, ctx, prover)
-          TradeInUtils.executeGameLPSingletonTokenMinting(setupConfig, ctx, prover)
-          TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
-
-        } else if (txType.equals("--compile")) {
-
-          // Compile contracts
-          TradeInUtils.compileContracts(setupConfig, ctx)
-
-        } else if (txType.equals("--execute")) {
-
-          // Execute all transactions
-          TradeInUtils.executeGameTokenMinting(setupConfig, ctx, prover)
-          TradeInUtils.executeGameLPSingletonTokenMinting(setupConfig, ctx, prover)
-          TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
 
         } else if (txType.equals("--mint-game-tokens")) {
 

@@ -30,7 +30,7 @@ This command will compile all the ErgoScript contracts required for the protocol
 
 #### Transaction Execution
 
-These commands will execute transactions in the setup phase of the protocol. It assumes that you have compiled the ErgoScript contracts already. You must execute these transactions in the order they appear. Please wait for confirmation before executing the next transaction in the setup phase of the protocol.
+These commands will execute transactions in the setup phase of the protocol. It assumes that you have compiled the ErgoScript contracts already. You must execute these transactions in the order they appear. Please wait for confirmation before executing the next transaction.
 
 1. Run `java -jar trade-in-<version>.jar --mint-game-tokens` to execute the game token mint transaction.
 2. Run `java -jar trade-in-<version>.jar --mint-game-lp-singleton` to execute the game liquidity pool singleton token minting transaction.

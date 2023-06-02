@@ -24,6 +24,11 @@
       "emissionInterval": 100,
       "emissionReductionFactorMultiplier": 2
     },
+    "cardValueMappingBoxCreation": {
+      "cardSetCollectionTokenId": "",
+      "totalCards": "",
+      "totalDataBuckets": ""
+    },
     "devAddress": "",
     "protocolPeriodInYears": 10,
     "devFeeInGameToken": 1,

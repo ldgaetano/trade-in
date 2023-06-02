@@ -9,21 +9,23 @@
 
     // ===== Box Contents ===== //
     // Tokens: Coll[(Coll[Byte], Long)]
-    // 1. (CardValueMappingSingletonTokenId, 1)
+    // 1. (CardValueMappingTokenId, CardSetSize + 1)
     // Registers:
-    // R4: Coll[Byte] CardValueMappingSingletonTokenName
-    // R5: Coll[Byte] CardValueMappingSingletonTokenDescription
-    // R6: Coll[Byte] CardValueMappingSingletonTokenDecimals
+    // R4: Coll[Byte] CardValueMappingTokenName
+    // R5: Coll[Byte] CardValueMappingTokenDescription
+    // R6: Coll[Byte] CardValueMappingTokenDecimals
 
     // ===== Relevant Transactions ===== //
     // 1. Card Value Mapping Box Creation Tx
-    // Inputs: CardValueMappingIssuance
+    // Inputs: GameLP, CardValueMappingIssuance
     // DataInputs: None
-    // Outputs: CardValueMapping, MinerFee
+    // Outputs: GameLP, CardValueMapping1, ... , CardValueMappingBoxN, MinerFee
     // Context Variables: None
     
     // ===== Compile Time Constants ($) ===== //
+    // $GameLPContractBytes: Coll[Byte]
     // $CardValueMappingContractBytes: Coll[Byte]
+    // $CardSetSize: Long
     // $SafeStorageRentValue: Long
     // $DevPK: SigmaProp
     // $MinerFee: Long
@@ -36,30 +38,37 @@
 
     // ===== Card Value Mapping Box Creation Tx ===== //
     val validCardValueMappingBoxCreationTx: Boolean = {
+
+        // Inputs
+        val gameLPBoxIN: Box = INPUTS(0)
         
         // Outputs    
-        val cardValueMappingBoxOUT: Box = OUTPUTS(0)
-        val minerFeeBoxOUT: Box = OUTPUTS(1)
+        val gameLPBoxOUT: Box = OUTPUTS(0)
+        val cardValueMappingBoxesOUT: Coll[Box] = OUTPUTS.slice(1, OUTPUTS.size-1)
+        val minerFeeBoxOUT: Box = OUTPUTS(OUTPUTS.size-1)
 
-        val validCardValueMappingBoxOUT: Boolean = {
+        val validGameLPBoxIN: Boolean = (gameLPBoxIN.propositionBytes == $GameLPContractBytes)
 
+        val validCardValueMappingBoxesOUT: Boolean = cardValueMappingBoxesOUT.forall({ (cardValueMappingBoxOUT: Box) =>
+        
             val validValue: Boolean = ($SafeStorageRentValue == cardValueMappingBoxOUT.value)
             val validContract: Boolean = ($CardValueMappingContractBytes == cardValueMappingBoxOUT.propositionBytes)
-            val validSingletonToken: Boolean = ((cardValueMappingBoxOUT.tokens(0)._1, 1L) == SELF.tokens(0))
+            val validTokens: Boolean = (cardValueMappingBoxOUT.tokens(0) == (SELF.tokens(0)._1, 1L))
 
             allOf(Coll(
                 validValue,
                 validContract,
-                validSingletonToken
+                validTokens
             ))
-            
-        }
+        
+        })
 
         val validMinerFee: Boolean = (minerFeeBoxOUT.value == $MinerFee)
 
-        val validOutputSize: Boolean = (OUTPUTS.size == 2)
+        val validOutputSize: Boolean = (OUTPUTS.size == ($CardSetSize + 1L).toInt)
 
         allOf(Coll(
+            validGameLPBoxIN,
             validCardValueMappingBoxOUT,
             validMinerFee,
             validOutputSize

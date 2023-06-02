@@ -1,9 +1,6 @@
 package builders.box_builders
-import configs.report_config.TradeInReportConfig
-import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, ErgoValue, InputBox, NetworkType, OutBox, OutBoxBuilder}
 import special.collection.Coll
-import utils.TradeInUtils
 
 case class GameLPBoxBuilder(
                            gameLPBoxValue: Long,

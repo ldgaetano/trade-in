@@ -11,7 +11,7 @@ This contract guards the Card Value Mapping Issuance box, which holds the minted
 
 ### Box Contents
 Tokens: Coll[(Coll[Byte], Long)]
-1. (CardValueMappingSingletonTokenId, 1)
+1. (CardValueMappingTokenId, CardSetSize + 1)
 
 Registers:
 - R4: Coll[Byte] CardValueMappingSingletonTokenName
@@ -19,14 +19,15 @@ Registers:
 - R6: Coll[Byte] CardValueMappingSingletonTokenDecimals
 
 ### Relevant Transactions
-1. Card Value Mapping Box Creation Tx
-- Inputs: CardValueMappingIssuance
+1. Card-Value-Mapping Box Creation Tx
+- Inputs: GameLP, CardValueMappingIssuance
 - DataInputs: None
-- Outputs: CardValueMapping, MinerFee
+- Outputs: GameLP, CardValueMapping1, ... , CardValueMappingN, MinerFee
 - Context Variables: None
 
 ### Compile Time Constants ($)
 - $CardValueMappingContractBytes: Coll[Byte]
+- $CardSetSize: Long
 - $SafeStorageRentValue: Long
 - $DevPK: SigmaProp
 - $MinerFee: Long

@@ -13,6 +13,7 @@ This contract guards the Game LP box, which holds the game tokens. This contract
 Tokens: Coll[(Coll[Byte], Long)]
 1. (GameLPSingletonTokenId, 1)
 2. (GameTokenId, GameTokenAmount)
+3. (CardValueMappingToken, 1)
 
 Registers:
 - R4: Coll[Byte] DevAddress
@@ -27,6 +28,12 @@ Registers:
 - Inputs: GameLP, PlayerProxy
 - DataInputs: CardValueMapping
 - Outputs: GameLP, PlayerPK, DevAddress, TxOperator, MinerFee
+- Context Variables: None
+
+2. Card-Value-Mapping Box Creation Tx
+- Inputs: GameLP, CardValueMappingIssuance
+- DataInputs: None
+- Outputs: GameLP, CardValueMapping1, ... , CardValueMappingN, MinerFee
 - Context Variables: None
 
 ### Compile Time Constants ($)

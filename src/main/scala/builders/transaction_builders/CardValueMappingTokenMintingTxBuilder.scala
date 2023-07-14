@@ -10,7 +10,7 @@ import utils.TradeInUtils
 
 import scala.collection.JavaConverters._
 
-case class CardValueMappingSingletonTokenMintingTxBuilder(
+case class CardValueMappingTokenMintingTxBuilder(
                                       devPKBoxes: Array[InputBox],
                                       cardValueMappingIssuance: OutBox,
                                       devPKAddress: Address,
@@ -34,9 +34,9 @@ case class CardValueMappingSingletonTokenMintingTxBuilder(
 
 }
 
-object CardValueMappingSingletonTokenMintingTxBuilder {
+object CardValueMappingTokenMintingTxBuilder {
 
-  def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig)(implicit ctx: BlockchainContext): CardValueMappingSingletonTokenMintingTxBuilder = {
+  def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig)(implicit ctx: BlockchainContext): CardValueMappingTokenMintingTxBuilder = {
 
     // tx builder
     val txBuilder: UnsignedTransactionBuilder = ctx.newTxBuilder()
@@ -59,12 +59,14 @@ object CardValueMappingSingletonTokenMintingTxBuilder {
     // create the card value mapping issuance box contract
     val issuanceContract: ErgoContract = CardValueMappingContractBuilder().toErgoContract
 
-    // create the singleton token
+    // create the token
+    val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
+    val cardSetId: String = setupConfig.settings.cardValueMappingBoxCreation.cardSetCollectionTokenId
     val cardValueMappingToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
       inputs(0).getId.toString,
-      1,
-      "Trade-In_" + setupConfig.settings.gameTokenMinting.gameTokenName + "_Card-Value-Mapping_Singleton_Token",
-      "Trade-In protocol card-value-mapping singleton token for " + setupConfig.settings.gameTokenMinting.gameTokenName,
+      cardSetSize,
+      "Trade-In_" + setupConfig.settings.gameTokenMinting.gameTokenName + "_Card-Value-Mapping_Token",
+      "Trade-In protocol card-value-mapping tokens for card set: " + cardSetId + "of game: " + setupConfig.settings.gameTokenMinting.gameTokenName,
       0,
       Array(),
       ""
@@ -81,7 +83,7 @@ object CardValueMappingSingletonTokenMintingTxBuilder {
     val minerFee: Long = setupConfig.settings.minerFeeInNanoERG
 
     // create the tx object
-    new CardValueMappingSingletonTokenMintingTxBuilder(inputs, issuance, devPK, minerFee)
+    new CardValueMappingTokenMintingTxBuilder(inputs, issuance, devPK, minerFee)
 
   }
 

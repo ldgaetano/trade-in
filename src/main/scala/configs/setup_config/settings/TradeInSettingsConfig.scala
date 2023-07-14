@@ -6,8 +6,8 @@ case class TradeInSettingsConfig(
                                cardValueMappingBoxCreation: TradeInCardValueMappingBoxCreationConfig,
                                devAddress: String,
                                protocolPeriodInYears: Long,
-                               devFeeInGameToken: Long,
-                               txOperatorFeeInGameToken: Long,
+                               devFeeInGameTokenPercentage: Double,
+                               txOperatorFeeInGameTokenPercentage: Double,
                                minerFeeInNanoERG: Long
                              )
 {}

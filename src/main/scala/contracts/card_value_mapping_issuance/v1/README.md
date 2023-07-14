@@ -1,4 +1,4 @@
-# trade-in: Card Value Mapping Issuance Contract - v1.0.0
+# Trade-In: Card Value Mapping Issuance Contract - v1.0.0
 
 ## Contract
 
@@ -26,6 +26,7 @@ Registers:
 - Context Variables: None
 
 ### Compile Time Constants ($)
+- $GameLPContractBytes: Coll[Byte]
 - $CardValueMappingContractBytes: Coll[Byte]
 - $CardSetSize: Long
 - $SafeStorageRentValue: Long

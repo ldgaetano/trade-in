@@ -48,6 +48,13 @@
 
         // Inputs
         val gameLPBoxIN: Box = INPUTS(0)
+        val devFee: (Long, Long) = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(0)
+        val txOperatorFee: (Long, Long) = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(1)
+        val emissionInterval: Long = gameLPBoxIN.R5[Long].get
+        val emissionReductionFactorMultiplier: Long = gameLPBoxIN.R6[Long].get
+        val emissionReductionFactor: Long = gameLPBoxIN.R7[Long].get
+        val cardTokenBurnCount: Long = gameLPBoxIN.R8[Long].get
+        val cardTokenBurnTotal: Long = gameLPBoxIN.R9[Long].get
 
         // DataInputs
         val cardValueMappingBoxIN: Box = CONTEXT.dataInputs(0)
@@ -117,24 +124,25 @@
                 val validContract: Boolean = (playerPKBoxOUT.propositionBytes == playerPK.propBytes)
 
                 val validGameTokens: Boolean = {
-                    
-                    // Game LP box data
-                    val emissionInterval: Long = gameLPBoxIN.R5[Long].get
-                    val emissionReductionFactorMultiplier: Long = gameLPBoxIN.R6[Long].get
-                    val emissionReductionFactor: Long = gameLPBoxIN.R7[Long].get
-                    val cardTokenBurnCount: Long = gameLPBoxIN.R8[Long].get
-                    val cardTokenBurnTotal: Long = gameLPBoxIN.R9[Long].get
 
                     val maxCardValue: Long = cardValueMappingCardValue
                                       
                     val validGameTokenTransfer: Boolean = {
 
-                        if (cardTokenBurnCount < emissionInterval) {
+                        if (cardTokenBurnCount < emissionInterval) { // We do not reduced the value of the card yet
                             
                             val cardValue: Long = maxCardValue / emissionReductionFactor
                             val newCount: Long = cardTokenBurnCount + 1L
 
-                            val validTransfer: Boolean = (playerPKBoxOUT.tokens(0) == (gameTokenId, cardValue))
+                            val devFeeAmount: Long = (cardValue * devFee._1) / devFee._2
+                            val txOperatorFeeAmount: Long = (cardValue * txOperatorFee._1) / txOperatorFee._2
+                            val playerAmount: Long = cardValue - devFeeAmount - txOperatorFeeAmount
+
+                            val validPlayerAmountTransfer: Boolean = (playerPKBoxOUT.tokens(0) == (gameTokenId, playerAmount))
+
+                            val validDevFeeTransfer: Boolean = (devAddressBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
+                            
+                            val validTxOperatorFeeTransfer: Boolean = (txOperatorBoxOUT.tokens(0) == (gameTokenId, txOperatorFeeAmount))
 
                             val validGameLPBoxOUTRegisterUpdate: Boolean = {
 
@@ -147,14 +155,27 @@
                             }
 
                             allOf(Coll(
-                                validTransfer,
+                                validPlayerAmountTransfer,
+                                validDevFeeTransfer,
+                                validTxOperatorFeeTransfer,
                                 validGameLPBoxOUTRegisterUpdate
-                            ))cardTokenId
+                            ))
+
+                        } else { // We now reduce the value of the card
+
                             val newCount: Long = 1L
                             val newFactor: Long = emissionReductionFactorMultiplier * emissionReductionFactor
                             val newCardValue: Long = maxCardValue / newFactor
 
-                            val validTransfer: Boolean = (playerPKBoxOUT.tokens(0) == (gameTokenId, newCardValue))
+                            val devFeeAmount: Long = (newCardValue * devFee._1) / devFee._2
+                            val txOperatorFeeAmount: Long = (newCardValue * txOperatorFee._1) / txOperatorFee._2
+                            val playerAmount: Long = newCardValue - devFeeAmount - txOperatorFeeAmount
+
+                            val validPlayerAmountTransfer: Boolean = (playerPKBoxOUT.tokens(0) == (gameTokenId, playerAmount))
+
+                            val validDevFeeTransfer: Boolean = (devAddressBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
+                            
+                            val validTxOperatorFeeTransfer: Boolean = (txOperatorBoxOUT.tokens(0) == (gameTokenId, txOperatorFeeAmount))
 
                             val validGameLPBoxOUTRegisterUpdate: Boolean = {
 
@@ -167,7 +188,9 @@
                             }
 
                             allOf(Coll(
-                                validTransfer,
+                                validPlayerAmountTransfer,
+                                validDevFeeTransfer,
+                                validTxOperatorFeeTransfer,
                                 validGameLPBoxOUTRegisterUpdate
                             ))
 
@@ -175,7 +198,6 @@
 
                     }
                     
-
                     allOf(Coll(
                         validGameTokenTransfer
                     ))
@@ -184,11 +206,7 @@
 
                 val validCardTokenBurn: Boolean = OUTPUTS.forall({ (output: Box) =>
 
-                    output.tokens.forall({ (t: (Coll[Byte], Long)) =>
-
-                        (t._1 != cardTokenId)
-
-                    })
+                    output.tokens.forall({ (t: (Coll[Byte], Long)) => (t._1 != cardTokenId) })
 
                 })
 

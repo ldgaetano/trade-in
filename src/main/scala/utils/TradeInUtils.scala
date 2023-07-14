@@ -1,12 +1,13 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
-import builders.transaction_builders.{CardValueMappingSingletonTokenMintingTxBuilder, GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
+import builders.transaction_builders.{CardValueMappingTokenMintingTxBuilder, GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, OutBox, SignedTransaction, UnsignedTransaction}
 
 import java.nio.file.{Files, Paths}
+import java.text.DecimalFormat
 import java.time.{LocalDateTime, ZoneId}
 import scala.util.Try
 
@@ -45,6 +46,22 @@ object TradeInUtils {
   final val STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS: Long = 1250000L
   final val STORAGE_RENT_FEE_PER_BYTE_PER_YEAR: Long = STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS / STORAGE_RENT_FEE_PERIOD_IN_YEARS
   final val MIN_BOX_VALUE_PER_BYTE: Long = 360L
+
+  /**
+   * Method to convert a decimal number to a rational fraction.
+   *
+   * @param number The number to convert into a fraction.
+   * @return Tuple of the numerator and denominator representing the decimal number.
+   */
+  def decimalToFraction(number: BigDecimal): (BigInt, BigInt) = {
+    val formatOptions: DecimalFormat = new DecimalFormat("#.##")
+    val fmtN: String = formatOptions.format(number)
+    val Array(whole: String, decimals: String) = fmtN.split("\\.")
+    val numDecimals: Int = decimals.length
+    val denominator: BigInt = BigInt(10).pow(numDecimals)
+    val numerator: BigInt = BigInt(whole) * denominator + BigInt(decimals)
+    (numerator, denominator)
+  }
 
   def calcMinBoxValue(): Long = {
 
@@ -117,7 +134,7 @@ object TradeInUtils {
     val reportConfig: TradeInReportConfig = readReportConfigResult.get
 
     // Build the transaction
-    val unsignedTx: UnsignedTransaction = CardValueMappingSingletonTokenMintingTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
+    val unsignedTx: UnsignedTransaction = CardValueMappingTokenMintingTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
     val signedTx: SignedTransaction = prover.sign(unsignedTx)
     val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
 

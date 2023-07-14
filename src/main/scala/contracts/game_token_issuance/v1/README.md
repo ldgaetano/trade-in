@@ -1,4 +1,4 @@
-# trade-in: Game Token Issuance Contract - v1.0.0
+# Trade-In: Game Token Issuance Contract - v1.0.0
 
 ## Contract
 

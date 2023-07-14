@@ -26,13 +26,12 @@
     },
     "cardValueMappingBoxCreation": {
       "cardSetCollectionTokenId": "",
-      "totalCards": "",
-      "totalDataBuckets": ""
+      "cardSetSize": ""
     },
     "devAddress": "",
     "protocolPeriodInYears": 10,
-    "devFeeInGameToken": 1,
-    "txOperatorFeeInGameToken": 2,
+    "devFeeInGameTokenPercentage": 0.05,
+    "txOperatorFeeInGameTokenPercentage": 0.01,
     "minerFeeInNanoERG": 1100000
   }
 }

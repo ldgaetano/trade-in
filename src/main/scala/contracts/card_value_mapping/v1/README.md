@@ -1,4 +1,4 @@
-# trade-in: Card Value Mapping Contract - v1.0.0
+# Trade-In: Card Value Mapping Contract - v1.0.0
 
 ## Contract
 

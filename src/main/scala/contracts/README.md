@@ -1,4 +1,5 @@
-# trade-in: ErgoScript contracts
+# Trade-In: ErgoScript contracts
+
 All contracts for the protocol are documented below.
 
 ## Setup

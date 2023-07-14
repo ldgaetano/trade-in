@@ -1,4 +1,4 @@
-# trade-in: Game LP Contract - v1.0.0
+# Trade-In: Game LP Contract - v1.0.0
 
 ## Contract
 
@@ -16,7 +16,7 @@ Tokens: Coll[(Coll[Byte], Long)]
 3. (CardValueMappingToken, 1)
 
 Registers:
-- R4: Coll[Byte] DevAddress
+- R4: (Coll[(Long, Long)], (Coll[Byte], Coll[Byte])) (Coll(DevFee, TxOperatorFee), (DevAddress, GameTokenId))
 - R5: Long       EmissionInterval
 - R6: Long       EmissionReductionFactorMultiplier
 - R7: Long       EmissionReductionFactor  
@@ -39,8 +39,7 @@ Registers:
 ### Compile Time Constants ($)
 - $CardValueMappingContractBytes: Coll[Byte]
 - $PlayerProxyContractBytes: Coll[Byte]
-- $DevFee: Long
-- $TxOperatorFee: Long
+- $DevPK: SigmaProp
 - $MinBoxValue: Long
 
 ### Context Variables (_)

@@ -1,4 +1,4 @@
-# trade-in: Player Proxy Contract - v1.0.0
+# Trade-In: Player Proxy Contract - v1.0.0
 
 ## Contract
 

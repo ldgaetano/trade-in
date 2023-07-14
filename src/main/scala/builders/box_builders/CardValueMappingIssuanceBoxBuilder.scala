@@ -5,12 +5,12 @@ import org.ergoplatform.appkit._
 case class CardValueMappingIssuanceBoxBuilder(
                                cardValueMappingIssuanceBoxValue: Long,
                                cardValueMappingIssuanceBoxContract: ErgoContract,
-                               cardValueMappingSingletonToken: Eip4Token
+                               cardValueMappingToken: Eip4Token
                                ) extends EIP4TokenIssuanceBoxBuilder {
 
   override val value: Long = cardValueMappingIssuanceBoxValue
   override val contract: ErgoContract = cardValueMappingIssuanceBoxContract
-  override val eip4Token: Eip4Token = cardValueMappingSingletonToken
+  override val eip4Token: Eip4Token = cardValueMappingToken
 
   override def toOutBox(implicit outBoxBuilder: OutBoxBuilder): OutBox = {
     outBoxBuilder

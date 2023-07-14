@@ -16,7 +16,7 @@
     // 2. (GameTokenId, GameTokenAmount)
     // 3. (CardValueMappingToken, 1)
     // Registers:
-    // R4: (Coll[Byte], Coll[Byte]) (DevAddress, GameTokenId)
+    // R4: (Coll[(Long, Long)], (Coll[Byte], Coll[Byte])) (Coll(DevFee, TxOperatorFee), (DevAddress, GameTokenId))
     // R5: Long       EmissionInterval
     // R6: Long       EmissionReductionFactorMultiplier
     // R7: Long       EmissionReductionFactor
@@ -38,9 +38,7 @@
     // ===== Compile Time Constants ($) ===== //
     // $CardValueMappingContractBytes: Coll[Byte]
     // $PlayerProxyContractBytes: Coll[Byte]
-    // $DevFee: Long
     // $DevPK: SigmaProp
-    // $TxOperatorFee: Long
     // $MinBoxValue: Long
 
     // ===== Context Variables (_) ===== //
@@ -48,8 +46,8 @@
 
     // ===== Relevant Variables ===== //
     val gameLPSingletonToken: (Coll[Byte], Long) = SELF.tokens(0)
-    val devAddress: Coll[Byte] = SELF.R4[(Coll[Byte], Coll[Byte])].get._1
-    val gameTokenId: Coll[Byte] = SELF.R4[(Coll[Byte], Coll[Byte])].get._2
+    val devAddress: Coll[Byte] = SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._2._1
+    val gameTokenId: Coll[Byte] = SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._2._2
     val emissionInterval: Long = SELF.R5[Long].get
     val emissionReductionFactorMultiplier: Long = SELF.R6[Long].get
     val txType: Byte = getVar[Byte](0).get
@@ -158,7 +156,7 @@
 
                 // The remaining registers will be determined by the Player Proxy contract
                 allOf(Coll(
-                    (gameLPBoxOUT.R4[(Coll[Byte], Coll[Byte])].get == (devAddress, gameTokenId)),
+                    (gameLPBoxOUT.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get == SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get),
                     (gameLPBoxOUT.R5[Long].get == emissionInterval),
                     (gameLPBoxOUT.R6[Long].get == emissionReductionFactorMultiplier)
                 ))
@@ -177,7 +175,7 @@
         val validPlayerPKBoxOUT: Boolean = {
 
             // Only check that player pk box has a game token in it, but the exact value is determined by the player proxy contract.
-            val validGameTokenId: Boolean = (playerPKBoxOUT.tokens(0)._1 == gameLPSingletonToken._1)
+            val validGameTokenId: Boolean = (playerPKBoxOUT.tokens(0)._1 == SELF.tokens(1)._1)
 
             allOf(Coll(
                 validGameTokenId
@@ -189,7 +187,7 @@
 
             val validValue: Boolean = (devAddressBoxOUT.value == $MinBoxValue)
             val validContract: Boolean = (devAddressBoxOUT.propositionBytes == devAddress)
-            val validGameToken: Boolean = (devAddressBoxOUT.tokens(0) == (SELF.tokens(1)._1, $DevFee))
+            val validGameToken: Boolean = (devAddressBoxOUT.tokens(0)._1 == SELF.tokens(1)._1) // Only check that the dev box has a game token in it, but the exact value is determined by the player proxy contract.
 
             allOf(Coll(
                 validValue,
@@ -202,7 +200,7 @@
         val validTxOperatorBoxOUT: Boolean = {
 
             val validValue: Boolean = (txOperatorBoxOUT.value == $MinBoxValue)
-            val validGameToken: Boolean = (txOperatorBoxOUT.tokens(0) == (SELF.tokens(1)._1, $TxOperatorFee))
+            val validGameToken: Boolean = (txOperatorBoxOUT.tokens(0)._1 == SELF.tokens(1)._1) // Only check that the tx operator box has a game token in it, but the exact value is determined by the player proxy contract.
 
             allOf(Coll(
                 validValue,
@@ -248,7 +246,7 @@
                     allOf(Coll(
                         (gameLPBoxOUT.value == SELF.value),
                         (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
-                        (gameLPBoxOUT.R4[(Coll[Byte], Coll[Byte])].get == SELF.R4[(Coll[Byte], Coll[Byte])].get),
+                        (gameLPBoxOUT.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get == SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get),
                         (gameLPBoxOUT.R5[Long].get == SELF.R5[Long].get),
                         (gameLPBoxOUT.R6[Long].get == SELF.R6[Long].get),
                         (gameLPBoxOUT.R7[Long].get == SELF.R7[Long].get),

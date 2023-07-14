@@ -8,7 +8,9 @@ import special.sigma.SigmaProp
 import utils.TradeInUtils
 
 case class CardValueMappingIssuanceContractBuilder(
+                                                    gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]],
                                                     cardValueMappingContractBytes: ErgoValue[Coll[java.lang.Byte]],
+                                                    cardSetSize: Long,
                                                     safeStorageRentValue: Long,
                                                     devPK: ErgoValue[SigmaProp],
                                                     minerFee: Long
@@ -20,7 +22,9 @@ case class CardValueMappingIssuanceContractBuilder(
 
         ctx.compileContract(
             ConstantsBuilder.create()
+              .item("$GameLPContractBytes", gameLPContractBytes)
               .item("$CardValueMappingContractBytes", cardValueMappingContractBytes.getValue)
+              .item("$CardSetSize", cardSetSize)
               .item("$SafeStorageRentValue", safeStorageRentValue)
               .item("$DevPK", devPK.getValue)
               .item("$MinerFee", minerFee)
@@ -36,7 +40,9 @@ object CardValueMappingIssuanceContractBuilder {
 
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): CardValueMappingIssuanceContractBuilder = {
 
+        val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
         val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBox.cardValueMappingContract).toPropositionBytes)
+
         val devPK: ErgoValue[SigmaProp] = ErgoValue.of(Address.createEip3Address(
             setupConfig.node.wallet.index,
             setupConfig.node.networkType,
@@ -45,8 +51,12 @@ object CardValueMappingIssuanceContractBuilder {
             false
         ).getSigmaBoolean)
 
+        val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.totalCards
+
         new CardValueMappingIssuanceContractBuilder(
+            gameLPContractBytes,
             cardValueMappingContract,
+            cardSetSize,
             TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears),
             devPK,
             setupConfig.settings.minerFeeInNanoERG

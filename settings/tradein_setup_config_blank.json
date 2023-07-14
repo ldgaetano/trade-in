@@ -24,10 +24,14 @@
       "emissionInterval": 100,
       "emissionReductionFactorMultiplier": 2
     },
+    "cardValueMappingBoxCreation": {
+      "cardSetCollectionTokenId": "",
+      "cardSetSize": ""
+    },
     "devAddress": "",
     "protocolPeriodInYears": 10,
-    "devFeeInGameToken": 1,
-    "txOperatorFeeInGameToken": 2,
+    "devFeeInGameTokenPercentage": 0.05,
+    "txOperatorFeeInGameTokenPercentage": 0.01,
     "minerFeeInNanoERG": 1100000
   }
 }

@@ -1,4 +1,4 @@
-# trade-in: Game LP Issuance Contract - v1.0.0
+# Trade-In: Game LP Issuance Contract - v1.0.0
 
 ## Contract
 

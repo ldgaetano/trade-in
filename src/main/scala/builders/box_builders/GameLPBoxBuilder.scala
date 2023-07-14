@@ -1,9 +1,11 @@
 package builders.box_builders
-import configs.report_config.TradeInReportConfig
-import configs.setup_config.TradeInSetupConfig
-import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, ErgoValue, InputBox, NetworkType, OutBox, OutBoxBuilder}
+
+import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, ErgoToken, ErgoValue, InputBox, OutBox, OutBoxBuilder}
 import special.collection.Coll
-import utils.TradeInUtils
+
+import scala.jdk.CollectionConverters._
+
 
 case class GameLPBoxBuilder(
                            gameLPBoxValue: Long,
@@ -11,6 +13,8 @@ case class GameLPBoxBuilder(
                            gameLPSingletonToken: Eip4Token,
                            gameToken: Eip4Token,
                            devAddress: ErgoValue[Coll[java.lang.Byte]],
+                           devFee: ErgoValue[(java.lang.Long, java.lang.Long)],
+                           txOperatorFee: ErgoValue[(java.lang.Long, java.lang.Long)],
                            emissionInterval: ErgoValue[java.lang.Long],
                            emissionReductionFactorMultiplier: ErgoValue[java.lang.Long],
                            emissionReductionFactor: ErgoValue[java.lang.Long],
@@ -19,18 +23,26 @@ case class GameLPBoxBuilder(
                            ) extends TradeInBoxBuilder {
   override val value: Long = gameLPBoxValue
   override val contract: ErgoContract = gameLPBoxContract
+  private var cardValueMappingTokens: Array[Eip4Token] = Array()
 
   override def toOutBox(implicit outBoxBuilder: OutBoxBuilder): OutBox = {
+
+    val validTokens: Array[Eip4Token] = {
+      if (cardValueMappingTokens.length > 0) {
+        Array(gameLPSingletonToken, gameToken) ++ cardValueMappingTokens
+      } else {
+        Array(gameLPSingletonToken, gameToken)
+      }
+    }
 
     outBoxBuilder
       .value(gameLPBoxValue)
       .contract(gameLPBoxContract)
       .tokens(
-        gameLPSingletonToken,
-        gameToken
+        validTokens:_*
       )
       .registers(
-        devAddress,
+        ErgoValue.pairOf(devAddress, ErgoValue.of(gameToken.getId.getBytes)),
         emissionInterval,
         emissionReductionFactorMultiplier,
         emissionReductionFactor,
@@ -38,6 +50,27 @@ case class GameLPBoxBuilder(
         cardTokenBurnTotal
       )
       .build()
+
+  }
+
+  def setCardValueMappingTokens(cardValueMappingInputBox: InputBox, newCardValueMappingToken: Eip4Token): Unit = {
+
+    val currentTokens: List[String] = cardValueMappingInputBox.getTokens.asScala.toList.map((t: ErgoToken) => t.getId.toString)
+
+    if (currentTokens.length > 2) {
+
+     var prevCardValueMappingTokens: Array[Eip4Token] = Array()
+      currentTokens.foreach( (id: String) =>
+        prevCardValueMappingTokens = prevCardValueMappingTokens ++ Array(Eip4TokenBuilder.buildFromErgoBox(id, cardValueMappingInputBox))
+      )
+
+      this.cardValueMappingTokens = prevCardValueMappingTokens ++ Array(newCardValueMappingToken)
+
+    } else {
+
+      this.cardValueMappingTokens = Array(newCardValueMappingToken)
+
+    }
 
   }
 

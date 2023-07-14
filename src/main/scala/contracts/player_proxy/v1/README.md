@@ -1,4 +1,4 @@
-# trade-in: Player Proxy Contract - v1.0.0
+# Trade-In: Player Proxy Contract - v1.0.0
 
 ## Contract
 
@@ -17,7 +17,7 @@ Registers:
 - R4: SigmaProp  PlayerPK
 - R5: Coll[Byte] GameLPSingletonTokenId
 - R6: Coll[Byte] GameTokenId
-- R7: Coll[Byte] CardValueMappingSingletonTokenId
+- R7: Coll[Byte] CardValueMappingTokenId
 - R8: Long       MinerFee
 
 ### Relevant Transactions
@@ -31,8 +31,5 @@ Registers:
 - None
 
 ### Context Variables (_)
-- _CardTokenIssuerBox: Box
 - _CardSetCollectionIssuerBox: Box
-
-### User Defined Functions
-- def selectRegister(bucket: Byte): Coll[(Coll[Byte], Long)]
+- _CardTokenIssuerBox: Box

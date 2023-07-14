@@ -1,4 +1,4 @@
-# trade-in: Card Value Mapping Contract - v1.0.0
+# Trade-In: Card Value Mapping Contract - v1.0.0
 
 ## Contract
 
@@ -7,20 +7,17 @@
 ## Documentation
 
 ### Description
-This contract guards the Card Value Mapping box, which holds in its registers a map from the hash of the card token id to its associated maximum possible value in denominated in the appropriate game token. This box will be used as a data input into the trade-in transaction so that it can be referenced by multiple transactions at the same time.
+This contract guards the Card Value Mapping box. For each card in a set, there exists a corresponding card-value-mapping box that holds information about the card token and its maximum possible value.
 
 ### Box Contents
 Tokens: Coll[(Coll[Byte], Long)]
-1. (CardValueMappingSingletonTokenId, 1)
+1. (CardValueMappingTokenId, 1)
 
 Registers:
-- R4: (Coll[Byte], (Coll[Byte], (Long, (Byte, Byte)))) (CardSetCollectionTokenId, (GameTokenId, (TotalCards, (TotalDataBuckets, DataBucketSize))))
-- R5: Coll[(Coll[Byte], Long)] Coll[(CardTokenHash, MaxCardValue)] => DataBucket0
-- R6: Coll[(Coll[Byte], Long)] Coll[(CardTokenHash, MaxCardValue)] => DataBucket1
-- R7: Coll[(Coll[Byte], Long)] Coll[(CardTokenHash, MaxCardValue)] => DataBucket2
-- R8: Coll[(Coll[Byte], Long)] Coll[(CardTokenHash, MaxCardValue)] => DataBucket3
-- R9: Coll[(Coll[Byte], Long)] Coll[(CardTokenHash, MaxCardValue)] => DataBucket4
-
+- R4: Coll[Byte] GameTokenId
+- R5: Coll[Byte] CardSetCollectionTokenId
+- R6: Coll[Byte] CardTokenId
+- R7: Long       CardValue
 ### Relevant Transactions
 1. Trade-In Tx
 - Inputs: GameLP, PlayerProxy

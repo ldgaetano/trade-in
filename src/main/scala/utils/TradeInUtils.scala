@@ -1,12 +1,13 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
-import builders.transaction_builders.{GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
+import builders.transaction_builders.{CardValueMappingTokenMintingTxBuilder, GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, OutBox, SignedTransaction, UnsignedTransaction}
 
 import java.nio.file.{Files, Paths}
+import java.text.DecimalFormat
 import java.time.{LocalDateTime, ZoneId}
 import scala.util.Try
 
@@ -45,6 +46,22 @@ object TradeInUtils {
   final val STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS: Long = 1250000L
   final val STORAGE_RENT_FEE_PER_BYTE_PER_YEAR: Long = STORAGE_RENT_FEE_PER_BYTE_PER_PERIOD_IN_YEARS / STORAGE_RENT_FEE_PERIOD_IN_YEARS
   final val MIN_BOX_VALUE_PER_BYTE: Long = 360L
+
+  /**
+   * Method to convert a decimal number to a rational fraction.
+   *
+   * @param number The number to convert into a fraction.
+   * @return Tuple of the numerator and denominator representing the decimal number.
+   */
+  def decimalToFraction(number: BigDecimal): (BigInt, BigInt) = {
+    val formatOptions: DecimalFormat = new DecimalFormat("#.##")
+    val fmtN: String = formatOptions.format(number)
+    val Array(whole: String, decimals: String) = fmtN.split("\\.")
+    val numDecimals: Int = decimals.length
+    val denominator: BigInt = BigInt(10).pow(numDecimals)
+    val numerator: BigInt = BigInt(whole) * denominator + BigInt(decimals)
+    (numerator, denominator)
+  }
 
   def calcMinBoxValue(): Long = {
 
@@ -107,6 +124,36 @@ object TradeInUtils {
    * @return The boolean value if the api url matched the local node url
    */
   def isLocalNodeApiUrl(apiUrl: String): Boolean = apiUrl.equals(DEFAULT_LOCAL_NODE_MAINNET_API_URL) || apiUrl.equals(DEFAULT_LOCAL_NODE_TESTNET_API_URL)
+
+  def executeCardValueMappingSingletonTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: CARD-VALUE-MAPPING SINGLETON TOKEN MINTING ==========" + Console.RESET)
+
+    // read the report
+    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+    val reportConfig: TradeInReportConfig = readReportConfigResult.get
+
+    // Build the transaction
+    val unsignedTx: UnsignedTransaction = CardValueMappingTokenMintingTxBuilder(setupConfig, reportConfig).build(ctx.newTxBuilder())
+    val signedTx: SignedTransaction = prover.sign(unsignedTx)
+    val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
+
+    // Print out tx status message
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: CARD-VALUE-MAPPING SINGLETON TOKEN MINTING ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: CARD-VALUE-MAPPING SINGLETON TOKEN MINTING ==========" + Console.RESET)
+    reportConfig.cardValueMappingIssuanceBox.boxId = signedTx.getOutputsToSpend.get(0).getId.toString
+    reportConfig.cardValueMappingIssuanceBox.txId = txId
+    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
+    // Print tx link to user
+    println(Console.BLUE + s"========== ${TradeInUtils.getTimeStamp("UTC")} VIEW TX IN THE ERGO-EXPLORER WITH THE LINK BELOW ==========" + Console.RESET)
+    if (ctx.getNetworkType.equals(NetworkType.MAINNET)) {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_MAINNET + txId)
+    } else {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_TESTNET + txId)
+    }
+
+  }
 
   def executeGameLPBoxCreation(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
 

@@ -15,12 +15,14 @@
     "gameLPContract": "",
     "txId": ""
   },
-  "cardValueMappingIssuanceBox": {
+  "cardValueMappingIssuanceBoxes": [
+    {
     "cardValueMappingIssuanceContract": "",
-    "cardValueMappingSingletonTokenId": "",
+    "cardValueMappingTokenId": "",
     "boxId": "",
     "txId": ""
-  },
+    }
+  ],
   "cardValueMappingBox": {
     "cardValueMappingContract": "",
     "boxId": "",

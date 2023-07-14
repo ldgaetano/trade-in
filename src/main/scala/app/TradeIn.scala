@@ -63,6 +63,14 @@ object TradeIn {
 
           TradeInUtils.executeGameLPBoxCreation(setupConfig, ctx, prover)
 
+        } else if (txType.equals("--mint-card-value-mapping-singleton")) {
+
+          TradeInUtils.executeCardValueMappingSingletonTokenMinting(setupConfig, ctx, prover)
+
+        } else if (txType.equals("--card-value-mapping-creation")) {
+
+          System.out.println("not implemented yet!")
+
         } else {
 
           throw new IllegalArgumentException("invalid command")

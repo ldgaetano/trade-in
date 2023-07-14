@@ -8,3 +8,4 @@ case class TradeInGameTokenMintingConfig(
                                           gameTokenPictureFileName: String,
                                           gameTokenPictureLink: String
                                         )
+{}

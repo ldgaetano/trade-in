@@ -1,4 +1,4 @@
-# trade-in: Card Value Mapping Issuance Contract
+# Trdae-In: Card Value Mapping Issuance Contract
 Below are the links to the respective documentation for the different versions of the contract. The most recent version will be the one currently in use.
 
 ## Versions

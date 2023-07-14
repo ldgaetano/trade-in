@@ -1,4 +1,4 @@
-# trade-in
+# Trade-In
 Card game token burn and trade-in protocol for Ergo blockchain.
 
 ### KYA

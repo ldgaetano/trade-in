@@ -51,7 +51,7 @@ object CardValueMappingIssuanceContractBuilder {
             false
         ).getSigmaBoolean)
 
-        val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.totalCards
+        val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
 
         new CardValueMappingIssuanceContractBuilder(
             gameLPContractBytes,

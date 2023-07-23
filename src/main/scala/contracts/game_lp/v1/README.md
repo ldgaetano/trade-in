@@ -41,6 +41,8 @@ Registers:
 - $PlayerProxyContractBytes: Coll[Byte]
 - $DevPK: SigmaProp
 - $MinBoxValue: Long
+- $SetCreationMutliSigThreshold: Int
+- $SetCreationMultiSigAddresses: Coll[SigmaProp]
 
 ### Context Variables (_)
-- None
+- _TransactionType: Byte

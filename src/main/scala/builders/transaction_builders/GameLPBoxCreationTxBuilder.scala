@@ -7,6 +7,7 @@ import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoValue, InputBox, NetworkType, OutBox, SecretString, UnsignedTransaction, UnsignedTransactionBuilder}
 import special.collection.Coll
+import utils.TradeInUtils
 
 case class GameLPBoxCreationTxBuilder(
                                      gameLPIssuanceBox: InputBox,
@@ -49,17 +50,27 @@ object GameLPBoxCreationTxBuilder {
     // get the dev address: where the game token dev fee will go, does not have to be a PK address, could also be a P2S address
     val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes)
 
+    // get the dev fee
+    val devFeeBigInt: (BigInt, BigInt) = TradeInUtils.decimalToFraction(setupConfig.settings.devFeeInGameTokenPercentage)
+    val devFee: ErgoValue[(java.lang.Long, java.lang.Long)] = ErgoValue.pairOf(ErgoValue.of(devFeeBigInt._1.toLong), ErgoValue.of(devFeeBigInt._2.toLong))
+
+    // get the tx operator fee
+    val txOperatorFeeBigInt: (BigInt, BigInt) = TradeInUtils.decimalToFraction(setupConfig.settings.txOperatorFeeInGameTokenPercentage)
+    val txOperatorFee: ErgoValue[(java.lang.Long, java.lang.Long)] = ErgoValue.pairOf(ErgoValue.of(devFeeBigInt._1.toLong), ErgoValue.of(devFeeBigInt._2.toLong))
+
     // get protocol parameters
     val emissionInterval: ErgoValue[java.lang.Long] = ErgoValue.of(setupConfig.settings.gameLPBoxCreation.emissionInterval)
     val emissionReductionFactorMultiplier: ErgoValue[java.lang.Long] = ErgoValue.of(setupConfig.settings.gameLPBoxCreation.emissionReductionFactorMultiplier)
 
     // build the game lp box
-    val gameLPBox = GameLPBoxBuilder(
+    val gameLPBox = new GameLPBoxBuilder(
       lpIssuance.getValue,
       lpBoxContract,
       Eip4TokenBuilder.buildFromErgoBox(reportConfig.gameLPIssuanceBox.gameLPSingletonTokenId, lpIssuance),
       Eip4TokenBuilder.buildFromErgoBox(reportConfig.gameTokenIssuanceBox.gameTokenId, gameTokenIssuance),
       devAddress,
+      devFee,
+      txOperatorFee,
       emissionInterval,
       emissionReductionFactorMultiplier,
       ErgoValue.of(1L),

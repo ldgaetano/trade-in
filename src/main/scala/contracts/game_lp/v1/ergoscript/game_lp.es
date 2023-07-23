@@ -40,9 +40,15 @@
     // $PlayerProxyContractBytes: Coll[Byte]
     // $DevPK: SigmaProp
     // $MinBoxValue: Long
+    // $SetCreationMultiSigThreshold: Int
+    // $SetCreationMultiSigAddresses: Coll[SigmaProp]
 
     // ===== Context Variables (_) ===== //
     // _TransactionType: Byte
+
+    // ===== Transaction Types ===== //
+    // 1 => Trade-In Tx
+    // 2 => Card-Value-Mapping Box Creation Tx
 
     // ===== Relevant Variables ===== //
     val gameLPSingletonToken: (Coll[Byte], Long) = SELF.tokens(0)
@@ -238,6 +244,17 @@
             val cardValueMappingBoxesOUT: Coll[Box] = OUTPUTS.slice(1, OUTPUTS.size-1)
             val minerFeeBoxOUT: Box = OUTPUTS(OUTPUTS.size-1)
 
+            val isInitialCreation: Boolean = {
+
+                // 1. The lp output box has three tokens, the third being the first card-value mapping token id.
+                // 2. The lp output box must contain the game token id.
+
+                allOf(Coll(
+                    (gameLPBoxOUT.tokens.size == 3),
+                    (gameLPBoxOUT.tokens.exists({ (t: (Coll[Byte], Long) => t._1 == gameTokenId) }))
+                ))           
+            
+            }
 
             val validGameLPBoxOUT: Boolean = {
 
@@ -285,7 +302,20 @@
             ))
         }
 
-        sigmaProp(validCardValueMappingBoxCreationTx) && $DevPK
+        sigmaProp(validCardValueMappingBoxCreationTx) && {
+
+            if (isInitialCreation) {
+
+                $DevPK
+
+
+            } else {
+
+                atLeast($SetCreationMultiSigThreshold, $SetCreationMultiSigAddresses)
+
+            }
+
+        } 
 
     } else {
         sigmaProp(false)

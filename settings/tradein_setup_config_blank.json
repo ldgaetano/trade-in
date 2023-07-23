@@ -28,6 +28,10 @@
       "cardSetCollectionTokenId": "",
       "cardSetSize": ""
     },
+    "setCreationMultiSig": {
+      "threshold": 1,
+      "addresses": []
+    },
     "devAddress": "",
     "protocolPeriodInYears": 10,
     "devFeeInGameTokenPercentage": 0.05,

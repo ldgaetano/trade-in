@@ -30,7 +30,6 @@ Registers:
 - $GameLPContractBytes: Coll[Byte]
 - $SafeStorageRentValue: Long
 - $DevPK: SigmaProp
-- $DevAddress: Coll[Byte]
 - $MinerFee: Long
 
 ### Context Variables (_)

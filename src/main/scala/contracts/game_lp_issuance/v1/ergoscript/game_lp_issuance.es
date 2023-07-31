@@ -27,7 +27,6 @@
     // $GameLPContractBytes: Coll[Byte]
     // $SafeStorageRentValue: Long
     // $DevPK: SigmaProp
-    // $DevAddress: Coll[Byte]
     // $MinerFee: Long
 
     // ===== Context Variables (_) ===== //
@@ -61,7 +60,6 @@
             val validValue: Boolean = ($SafeStorageRentValue == gameLPBoxOUT.value)
             val validContract: Boolean = ($GameLPContractBytes == gameLPBoxOUT.propositionBytes)
             val validSingletonToken: Boolean = ((gameLPBoxOUT.tokens(0)._1, 1L) == SELF.tokens(0))
-            val validRegister: Boolean = (gameLPBoxOUT.R4[Coll[Byte]].get == $DevAddress)
 
             allOf(Coll(
                 validValue,

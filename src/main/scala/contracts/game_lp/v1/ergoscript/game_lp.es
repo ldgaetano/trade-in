@@ -16,7 +16,7 @@
     // 2. (GameTokenId, GameTokenAmount)
     // 3. (CardValueMappingToken, 1)
     // Registers:
-    // R4: (Coll[(Long, Long)], (Coll[Byte], Coll[Byte])) (Coll(DevFee, TxOperatorFee), (DevAddress, GameTokenId))
+    // R4: (Coll[(Long, Long)], Coll[Byte]) (Coll(DevFee, TradeInFee), GameTokenId)
     // R5: Long       EmissionInterval
     // R6: Long       EmissionReductionFactorMultiplier
     // R7: Long       EmissionReductionFactor
@@ -37,51 +37,68 @@
     
     // ===== Compile Time Constants ($) ===== //
     // $CardValueMappingContractBytes: Coll[Byte]
-    // $PlayerProxyContractBytes: Coll[Byte]
     // $DevPK: SigmaProp
+    // $DevAddress: Coll[Byte]
+    // $TradeInFeeAddress: SigmaProp
     // $MinBoxValue: Long
     // $SetCreationMultiSigThreshold: Int
     // $SetCreationMultiSigAddresses: Coll[SigmaProp]
 
     // ===== Context Variables (_) ===== //
     // _TransactionType: Byte
+    // _CardSetCollectionIssuerBox: Box
+    // _CardTokenIssuerBox: Box
 
     // ===== Transaction Types ===== //
     // 1 => Trade-In Tx
     // 2 => Card-Value-Mapping Box Creation Tx
 
     // ===== Relevant Variables ===== //
-    val gameLPSingletonToken: (Coll[Byte], Long) = SELF.tokens(0)
-    val devAddress: Coll[Byte] = SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._2._1
-    val gameTokenId: Coll[Byte] = SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._2._2
-    val emissionInterval: Long = SELF.R5[Long].get
-    val emissionReductionFactorMultiplier: Long = SELF.R6[Long].get
-    val txType: Byte = getVar[Byte](0).get
+    val gameLPSingletonToken: (Coll[Byte], Long)    = SELF.tokens(0)
+    val gameTokenId: Coll[Byte]                     = SELF.R4[(Coll[(Long, Long)], Coll[Byte])].get._2
+    val emissionInterval: Long                      = SELF.R5[Long].get
+    val emissionReductionFactorMultiplier: Long     = SELF.R6[Long].get
+    val emissionReductionFactor: Long               = SELF.R7[Long].get
+    val cardTokenBurnCount: Long                    = SELF.R8[Long].get
+    val cardTokenBurnTotal: Long                    = SELF.R9[Long].get
+    val _TxType: Byte                               = getVar[Byte](0).get
+    val _CardSetCollectionIssuerBox: Box            = getVar[Box](1).get
+    val _CardTokenIssuerBox: Box                    = getVar[Box](2).get
+    val cardSetCollectionTokenId: Coll[Byte]        = _CardTokenIssuerBox.R7[Coll[Byte]].get
 
-    if (txType == 1) {
+    if (_TxType == 1) {
 
         // ===== Trade-In Tx ===== //
         val validTradeInTx: Boolean = {
 
-        // Inputs
-        val playerProxyBoxIN: Box = INPUTS(1)
-
         // DataInputs
-        val cardValueMappingBoxIN: Box = CONTEXT.dataInputs(0)
+        val cardValueMappingBoxIN: Box                              = CONTEXT.dataInputs(0)
+        val cardValueMappingGameTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R4[Coll[Byte]].get
+        val cardValueMappingCardSetCollectionTokenId: Coll[Byte]    = cardValueMappingBoxIN.R5[Coll[Byte]].get
+        val cardValueMappingCardTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R6[Coll[Byte]].get
+        val cardValueMappingCardValue: Long                         = cardValueMappingBoxIN.R7[Long].get
 
         // Outputs
-        val gameLPBoxOUT: Box = OUTPUTS(0)
-        val playerPKBoxOUT: Box = OUTPUTS(1)
-        val devAddressBoxOUT: Box = OUTPUTS(2)
-        val txOperatorBoxOUT: Box = OUTPUTS(3)
-        val minerFeeBoxOUT: Box = OUTPUTS(4)
+        val gameLPBoxOUT: Box       = OUTPUTS(0)
+        val tradeInFeeBoxOUT: Box   = OUTPUTS(1)
+        val devAddressBoxOUT: Box   = OUTPUTS(2)
 
-        val validPlayerProxyBoxIN: Boolean = {
+        val validCard: Boolean = {
 
-            val validContract: Boolean = (playerProxyBoxIN.propositionBytes == $PlayerProxyContractBytes)
+            // Conditions:
+            // 1. Card value mapping card token exists in the inputs somewhere
+            // 2. Card token issuer box (from minting) containts the card set collection token referenced from the standard in its tokens (required for the collection standard EIP34)
+            // 3. Card set collection issuer box id matches the token id of the card set collection token
+            // This ensures that the card id is not a random id but a legit id that comes from minting a token that is part of a collection, according to EIP34.
+
+            val validCardToken: Boolean = INPUTS.exists({ (input: Box) => input.tokens.exists({ (t: (Coll[Byte], Long)) => t == (_CardTokenIssuerBox.id, 1L) }) })
+            val validCardTokenIssuer: Boolean = _CardTokenIssuerBox.tokens.exists({ (t: (Coll[Byte], Long)) => (t._1 == cardSetCollectionTokenId) })
+            val validCardSetCollectionIssuer: Boolean = (_CardSetCollectionIssuerBox.id == cardSetCollectionTokenId)
 
             allOf(Coll(
-                validContract
+                validCardToken,
+                validCardTokenIssuer,
+                validCardSetCollectionIssuer
             ))
 
         }
@@ -89,15 +106,25 @@
         val validCardValueMappingBoxIN: Boolean = {
 
             val cardValueMappingToken: (Coll[Byte], 1L) = cardValueMappingBoxIN.tokens(0)
-            val cardValueMappingGameTokenId: Coll[Byte] = cardValueMappingBoxIN.R4[Coll[Byte]].get
 
-            val validContract: Boolean = (cardValueMappingBoxIN.propositionBytes == $CardValueMappingContractBytes)
+            // Conditions:
+            // 1. We have a legit card value mapping box with the correct contract
+            // 2. We have a legit card value mapping token
+            // 3. The card value mapping box is associated to a legit card set
+            // 4. The card value mapping box is assocaited to a legit card
+            // 5. The card value mapping box is associated to the correct game token
+
+            val validContract: Boolean = (cardValueMappingBoxIN.propositionBytes == $CardValueMappingContractBytes) // This contract is written without compile time constants and is thus always identical.
             val validCardValueMappingToken: Boolean = SELF.tokens.exists({ (t: (Coll[Byte], Long)) => (t == cardValueMappingToken) })
+            val validCardSetCollectionTokenId: Boolean = (cardValueMappingCardSetCollectionTokenId == _CardSetCollectionIssuerBox.id)
+            val validCardTokenId: Boolean = (cardValueMappingCardTokenId == _CardTokenIssuerBox.id)
             val validGameTokenId: Boolean = (cardValueMappingGameTokenId == gameTokenId)
 
             allOf(Coll(
                 validContract,
-                validCardValueMappingToken
+                validCardValueMappingToken,
+                validCardSetCollectionTokenId,
+                validCardTokenId,
                 validGameTokenId
             ))
 
@@ -107,7 +134,7 @@
 
             val validValue: Boolean = (gameLPBoxOUT.value == SELF.value)
             val validContract: Boolean = (gameLPBoxOUT.propositionBytes == SELF.propositionBytes)
-            
+          
             val validTokens: Boolean = {
                 
                 if (SELF.tokens(1)._1 == gameTokenId) { // Not all game tokens have been distributed.
@@ -118,37 +145,26 @@
 
                         if (gameLPBoxOUT.tokens.size == SELF.tokens.size) { // If nothing about the amount of different tokens changes
 
-                            (gameLPBoxOUT.tokens(1)._1 == SELF.tokens(1)._1)
+                            allOf(Coll(
+                                (gameLPBoxOUT.tokens(1)._1 == SELF.tokens(1)._1),
+                                (gameLPBoxOUT.tokens.slice(2, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size))
+                            ))
+
                         
                         }  else { // Otherwise, the amount of different tokens must decrease and there must therefore be no more game tokens.
 
                             allOf(Coll(
                                 (gameLPBoxOUT.tokens.size < SELF.tokens.size),
-                                (gameLPBoxOUT.tokens(1)._1 != gameTokenId)
+                                (gameLPBoxOUT.tokens.slice(1, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size))
                             ))
 
                         } 
 
                     }
 
-                    val validCardValueMappingTokens: Boolean = {
-
-                        if (gameLPBoxOUT.tokens.size == SELF.tokens.size) { // There position must not change.
-
-                            (gameLPBoxOUT.tokens.slice(2, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size))
-
-                        } else { // There position should change but the tokens remain the same.
-
-                            (gameLPBoxOUT.tokens.slice(1, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size))
-
-                        }
-
-                    }
-
                     allOf(Coll(
                         validGameLPSingletonToken,
-                        validGameTokens,
-                        validCardValueMappingTokens
+                        validGameTokens
                     ))
 
 
@@ -160,12 +176,17 @@
 
             val validRegisters: Boolean = {
 
-                // The remaining registers will be determined by the Player Proxy contract
                 allOf(Coll(
-                    (gameLPBoxOUT.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get == SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get),
+                    (gameLPBoxOUT.R4[(Coll[(Long, Long)], Coll[Byte])].get == SELF.R4[(Coll[(Long, Long)], Coll[Byte])].get),
                     (gameLPBoxOUT.R5[Long].get == emissionInterval),
                     (gameLPBoxOUT.R6[Long].get == emissionReductionFactorMultiplier)
                 ))
+
+            }
+
+            val validBurn: Boolean = {
+
+
 
             }
 
@@ -191,8 +212,7 @@
 
         val validDevAddressBoxOUT: Boolean = {
 
-            val validValue: Boolean = (devAddressBoxOUT.value == $MinBoxValue)
-            val validContract: Boolean = (devAddressBoxOUT.propositionBytes == devAddress)
+            val validContract: Boolean = (devAddressBoxOUT.propositionBytes == $DevAddress)
             val validGameToken: Boolean = (devAddressBoxOUT.tokens(0)._1 == SELF.tokens(1)._1) // Only check that the dev box has a game token in it, but the exact value is determined by the player proxy contract.
 
             allOf(Coll(
@@ -203,28 +223,24 @@
 
         }
 
-        val validTxOperatorBoxOUT: Boolean = {
+        // val validTxOperatorBoxOUT: Boolean = {
 
-            val validValue: Boolean = (txOperatorBoxOUT.value == $MinBoxValue)
-            val validGameToken: Boolean = (txOperatorBoxOUT.tokens(0)._1 == SELF.tokens(1)._1) // Only check that the tx operator box has a game token in it, but the exact value is determined by the player proxy contract.
+        //     val validValue: Boolean = (txOperatorBoxOUT.value == $MinBoxValue)
+        //     val validGameToken: Boolean = (txOperatorBoxOUT.tokens(0)._1 == SELF.tokens(1)._1) // Only check that the tx operator box has a game token in it, but the exact value is determined by the player proxy contract.
 
-            allOf(Coll(
-                validValue,
-                validGameToken
-            ))
+        //     allOf(Coll(
+        //         validValue,
+        //         validGameToken
+        //     ))
 
-        }
-
-        val validOutputSize: Boolean = (OUTPUTS.size == 5)
+        // }
 
         allOf(Coll(
             validPlayerProxyBoxIN,
             validCardValueMappingBoxIN,
             validGameLPBoxOUT,
             validPlayerPKBoxOUT,
-            validDevAddressBoxOUT,
-            validTxOperatorBoxOUT,
-            validOutputSize
+            validDevAddressBoxOUT
         ))
         
         }
@@ -263,7 +279,7 @@
                     allOf(Coll(
                         (gameLPBoxOUT.value == SELF.value),
                         (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
-                        (gameLPBoxOUT.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get == SELF.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get),
+                        (gameLPBoxOUT.R4[(Coll[(Long, Long)], Coll[Byte])].get == SELF.R4[(Coll[(Long, Long)], Coll[Byte])].get),
                         (gameLPBoxOUT.R5[Long].get == SELF.R5[Long].get),
                         (gameLPBoxOUT.R6[Long].get == SELF.R6[Long].get),
                         (gameLPBoxOUT.R7[Long].get == SELF.R7[Long].get),

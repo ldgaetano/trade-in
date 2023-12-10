@@ -25,9 +25,7 @@
     
     // ===== Compile Time Constants ($) ===== //
     // $GameLPContractBytes: Coll[Byte]
-    // $SafeStorageRentValue: Long
     // $DevPK: SigmaProp
-    // $MinerFee: Long
 
     // ===== Context Variables (_) ===== //
     // None
@@ -45,39 +43,24 @@
         val gameLPBoxOUT: Box = OUTPUTS(0)
         val minerFeeBoxOUT: Box = OUTPUTS(1)
 
-        val validGameTokenIssuanceBoxIN: Boolean = {
-
-            val validValue: Boolean = (gameTokenIssuanceBoxIN.value == $MinerFee)
-
-            allOf(Coll(
-                validValue
-            ))
-
-        }
-
         val validGameLPBoxOUT: Boolean = {
 
-            val validValue: Boolean = ($SafeStorageRentValue == gameLPBoxOUT.value)
+            val validValue: Boolean = (SELF.value == gameLPBoxOUT.value)
             val validContract: Boolean = ($GameLPContractBytes == gameLPBoxOUT.propositionBytes)
             val validSingletonToken: Boolean = ((gameLPBoxOUT.tokens(0)._1, 1L) == SELF.tokens(0))
 
             allOf(Coll(
                 validValue,
                 validContract,
-                validSingletonToken,
-                validRegister
+                validSingletonToken
             ))
             
         }
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == $MinerFee)
-
         val validOutputSize: Boolean = (OUTPUTS.size == 2)
 
         allOf(Coll(
-            validGameTokenIssuanceBoxIN,
             validGameLPBoxOUT,
-            validMinerFee,
             validOutputSize
         ))
 

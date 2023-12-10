@@ -27,7 +27,7 @@
     // 1. Trade In Tx
     // Inputs: GameLP, PlayerProxy
     // DataInputs: CardValueMapping
-    // Outputs: GameLP, PlayerPK, DevAddress, TxOperator, MinerFee
+    // Outputs: GameLP, TradeInFee, PlayerPK, DevAddress, TxOperator, MinerFee
     // Context Variables: None
     // 2. Card-Value-Mapping Box Creation Tx
     // Inputs: GameLP, CardValueMappingIssuance
@@ -43,6 +43,7 @@
     // $MinBoxValue: Long
     // $SetCreationMultiSigThreshold: Int
     // $SetCreationMultiSigAddresses: Coll[SigmaProp]
+    // $PecisionFactor: Long
 
     // ===== Context Variables (_) ===== //
     // _TransactionType: Byte
@@ -73,184 +74,201 @@
         // ===== Trade-In Tx ===== //
         val validTradeInTx: Boolean = {
 
-            // DataInputs
-            val cardValueMappingBoxIN: Box                              = CONTEXT.dataInputs(0)
-            val cardValueMappingGameTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R4[Coll[Byte]].get
-            val cardValueMappingCardSetCollectionTokenId: Coll[Byte]    = cardValueMappingBoxIN.R5[Coll[Byte]].get
-            val cardValueMappingCardTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R6[Coll[Byte]].get
-            val cardValueMappingCardValue: Long                         = cardValueMappingBoxIN.R7[Long].get
+            // Check if there is anything left in the bank
+            if (SELF.tokens(1)._2 == 1) {
+                false
+            } else {
 
-            // Outputs
-            val gameLPBoxOUT: Box       = OUTPUTS(0)
-            val tradeInFeeBoxOUT: Box   = OUTPUTS(1)
-            val devFeeBoxOUT: Box       = OUTPUTS(2)
+                // DataInputs
+                val cardValueMappingBoxIN: Box                              = CONTEXT.dataInputs(0)
+                val cardValueMappingGameTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R4[Coll[Byte]].get
+                val cardValueMappingCardSetCollectionTokenId: Coll[Byte]    = cardValueMappingBoxIN.R5[Coll[Byte]].get
+                val cardValueMappingCardTokenId: Coll[Byte]                 = cardValueMappingBoxIN.R6[Coll[Byte]].get
+                val cardValueMappingCardValue: Long                         = cardValueMappingBoxIN.R7[Long].get // The max possible card value.
 
-            val validCard: Boolean = {
+                // Outputs
+                val gameLPBoxOUT: Box       = OUTPUTS(0)
+                val tradeInFeeBoxOUT: Box   = OUTPUTS(1)
+                val devFeeBoxOUT: Box       = OUTPUTS(2)
 
-                // Conditions:
-                // 1. Card value mapping card token exists in the inputs somewhere
-                // 2. Card token issuer box (from minting) containts the card set collection token referenced from the standard in its tokens (required for the collection standard EIP34)
-                // 3. Card set collection issuer box id matches the token id of the card set collection token
-                // This ensures that the card id is not a random id but a legit id that comes from minting a token that is part of a collection, according to EIP34.
+                val validCard: Boolean = {
 
-                val validCardToken: Boolean = INPUTS.exists({ (input: Box) => input.tokens.exists({ (t: (Coll[Byte], Long)) => t == (_CardTokenIssuerBox.id, 1L) }) })
-                val validCardTokenIssuer: Boolean = _CardTokenIssuerBox.tokens.exists({ (t: (Coll[Byte], Long)) => (t._1 == cardSetCollectionTokenId) })
-                val validCardSetCollectionIssuer: Boolean = (_CardSetCollectionIssuerBox.id == cardSetCollectionTokenId)
+                    // Conditions:
+                    // 1. Card value mapping card token exists in the inputs somewhere
+                    // 2. Card token issuer box (from minting) containts the card set collection token referenced from the standard in its tokens (required for the collection standard EIP34)
+                    // 3. Card set collection issuer box id matches the token id of the card set collection token
+                    // This ensures that the card id is not a random id but a legit id that comes from minting a token that is part of a collection, according to EIP34.
 
-                allOf(Coll(
-                    validCardToken,
-                    validCardTokenIssuer,
-                    validCardSetCollectionIssuer
-                ))
-
-            }
-
-            val validCardValueMappingBoxIN: Boolean = {
-
-                val cardValueMappingToken: (Coll[Byte], 1L) = cardValueMappingBoxIN.tokens(0)
-
-                // Conditions:
-                // 1. We have a legit card value mapping box with the correct contract
-                // 2. We have a legit card value mapping token
-                // 3. The card value mapping box is associated to a legit card set
-                // 4. The card value mapping box is assocaited to a legit card
-                // 5. The card value mapping box is associated to the correct game token
-
-                val validContract: Boolean = (cardValueMappingBoxIN.propositionBytes == $CardValueMappingContractBytes) // This contract is written without compile time constants and is thus always identical.
-                val validCardValueMappingToken: Boolean = SELF.tokens.exists({ (t: (Coll[Byte], Long)) => (t == cardValueMappingToken) })
-                val validCardSetCollectionTokenId: Boolean = (cardValueMappingCardSetCollectionTokenId == _CardSetCollectionIssuerBox.id)
-                val validCardTokenId: Boolean = (cardValueMappingCardTokenId == _CardTokenIssuerBox.id)
-                val validGameTokenId: Boolean = (cardValueMappingGameTokenId == gameTokenId)
-
-                allOf(Coll(
-                    validContract,
-                    validCardValueMappingToken,
-                    validCardSetCollectionTokenId,
-                    validCardTokenId,
-                    validGameTokenId
-                ))
-
-            }
-
-            val validGameLPBoxOUT: Boolean = {
-
-                val validSelfRecreation: Boolean = {
+                    val validCardToken: Boolean = INPUTS.exists({ (input: Box) => input.tokens.exists({ (t: (Coll[Byte], Long)) => t == (_CardTokenIssuerBox.id, 1L) }) })
+                    val validCardTokenIssuer: Boolean = _CardTokenIssuerBox.tokens.exists({ (t: (Coll[Byte], Long)) => (t._1 == cardSetCollectionTokenId) })
+                    val validCardSetCollectionIssuer: Boolean = (_CardSetCollectionIssuerBox.id == cardSetCollectionTokenId)
 
                     allOf(Coll(
-                        (gameLPBoxOUT.value == SELF.value),
-                        (gameLPBoxOUT.tokens(0) == SELF.tokens(0)),
-                        (gameLPBoxOUT.tokens(1)._1 == SELF.tokens(1)._1),
-                        (gameLPBoxOUT.tokens(1)._2 >= 1L),
-                        (gameLPBoxOUT.tokens.slice(2, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size)),
-                        (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
-                        (gameLPBoxOUT.R4[Coll[(Long, Long)]].get == SELF.R4[Coll[(Long, Long)]].get),
-                        (gameLPBoxOUT.R5[Long].get == emissio_CardTokenIssuerBoxnInterval),
-                        (gameLPBoxOUT.R6[Long].get == emissionReductionFactorMultiplier)
+                        validCardToken,
+                        validCardTokenIssuer,
+                        validCardSetCollectionIssuer
                     ))
 
                 }
-            
-                val validTokens: Boolean = {
-                                    
-                    val maxCardValue: Long = cardValueMappi_CardTokenIssuerBoxngCardValue
 
-                    val validGameTokenTransfer: Boolean = {
+                val validCardValueMappingBoxIN: Boolean = {
 
-                        if (cardTokenBurnCount < emissionInterval) { // We do not reduce the value of the card yet.
+                    val cardValueMappingToken: (Coll[Byte], 1L) = cardValueMappingBoxIN.tokens(0)
 
-                            val cardValue: Long = maxCardValue / emissionReductionFactor
-                            val newCount: Long = cardTokenBurnCount + 1L
+                    // Conditions:
+                    // 1. We have a legit card value mapping box with the correct contract
+                    // 2. We have a legit card value mapping token
+                    // 3. The card value mapping box is associated to a legit card set
+                    // 4. The card value mapping box is assocaited to a legit card
+                    // 5. The card value mapping box is associated to the correct game token
 
-                            val tradeInFeeAmount: Long = (cardValue * tradeInFee._1) / tradeInFee._2
-                            val devFeeAmount: Long = (cardValue * devFee._1) / devFee._2    
-                            //val playerAmount: Long = cardValue - tradeInFeeAmount - devFeeAmount
+                    val validContract: Boolean = (cardValueMappingBoxIN.propositionBytes == $CardValueMappingContractBytes) // This contract is written without compile time constants and is thus always identical.
+                    val validCardValueMappingToken: Boolean = SELF.tokens.exists({ (t: (Coll[Byte], Long)) => (t == cardValueMappingToken) })
+                    val validCardSetCollectionTokenId: Boolean = (cardValueMappingCardSetCollectionTokenId == _CardSetCollectionIssuerBox.id)
+                    val validCardTokenId: Boolean = (cardValueMappingCardTokenId == _CardTokenIssuerBox.id)
+                    val validGameTokenId: Boolean = (cardValueMappingGameTokenId == gameTokenId)
 
-                            val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - cardValue)
-                            val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
-                            val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
+                    allOf(Coll(
+                        validContract,
+                        validCardValueMappingToken,
+                        validCardSetCollectionTokenId,
+                        validCardTokenId,
+                        validGameTokenId
+                    ))
 
-                            val validGameLPRegisterUpdate: Boolean = {
+                }
+
+                val validGameLPBoxOUT: Boolean = {
+
+                    val validSelfRecreation: Boolean = {
+
+                        allOf(Coll(
+                            (gameLPBoxOUT.value == SELF.value),
+                            (gameLPBoxOUT.tokens(0) == SELF.tokens(0)),
+                            (gameLPBoxOUT.tokens(1)._1 == SELF.tokens(1)._1),
+                            (gameLPBoxOUT.tokens(1)._2 >= 1L),
+                            (gameLPBoxOUT.tokens.slice(2, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size)),
+                            (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
+                            (gameLPBoxOUT.R4[Coll[(Long, Long)]].get == SELF.R4[Coll[(Long, Long)]].get),
+                            (gameLPBoxOUT.R5[Long].get == emissio_CardTokenIssuerBoxnInterval),
+                            (gameLPBoxOUT.R6[Long].get == emissionReductionFactorMultiplier)
+                        ))
+
+                    }
+                
+                    val validTokens: Boolean = {
+                                        
+                        val maxCardValue: Long = cardValueMappingCardValue
+
+                        val validGameTokenTransfer: Boolean = {
+
+                            if (cardTokenBurnCount < emissionInterval) { // We do not reduce the value of the card yet.
+
+                                val cardValueDivision: Long = maxCardValue / emissionReductionFactor
+                                val cardValue: Long = if (cardValueDivision == 0L) precisionFactor else cardValueDivision
+                                val newCount: Long = cardTokenBurnCount + 1L
+
+                                val tradeInFeeAmountDivision: Long = (cardValue * tradeInFee._1) / tradeInFee._2
+                                val devFeeAmountDivision: Long = (cardValue * devFee._1) / devFee._2
+
+                                val tradeInFeeAmount: Long = if (tradeInFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                val devFeeAmount: Long = if (devFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                //val playerAmount: Long = cardValue - tradeInFeeAmount - devFeeAmount
+
+
+                                val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - cardValue)        
+                                val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
+                                val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount)) 
+                                
+                                val validGameLPRegisterUpdate: Boolean = {
+
+                                    allOf(Coll(
+                                        (gameLPBoxOUT.R7[Long].get == emissionReductionFactor),
+                                        (gameLPBoxOUT.R8[Long].get == cardTokenBurnCount + 1L),
+                                        (gameLPBoxOUT.R9[Long].get == cardTokenBurnTotal + 1L)
+                                    ))
+
+                                }
 
                                 allOf(Coll(
-                                    (gameLPBoxOUT.R7[Long].get == emissionReductionFactor),
-                                    (gameLPBoxOUT.R8[Long].get == cardTokenBurnCount + 1L),
-                                    (gameLPBoxOUT.R9[Long].get == cardTokenBurnTotal + 1L)
+                                    validGameLPWithdraw,
+                                    validTradeInFeeTransfer,
+                                    validDevFeeTransfer,
+                                    validGameLPRegisterUpdate
                                 ))
 
-                            }
+                            } else { // We now reduce the value of the card
 
-                            allOf(Coll(
-                                validGameLPWithdraw,
-                                validTradeInFeeTransfer,
-                                validDevFeeTransfer,
-                                validGameLPRegisterUpdate
-                            ))
+                                val newCount: Long = 1L
+                                val newFactor: Long = emissionReductionFactorMultiplier * emissionReductionFactor
+                                val newCardValueDivision: Long = maxCardValue / newFactor
 
-                        } else { // We now reduce the value of the card
+                                val newCardValue: Long = if (newCardValueDivision == 0L) precisionFactor else newCardValueDivision
 
-                            val newCount: Long = 1L
-                            val newFactor: Long = emissionReductionFactorMultiplier * emissionReductionFactor
-                            val newCardValue: Long = maxCardValue / newFactor
+                                val tradeInFeeAmountDivision: Long = (newCardValue * tradeInFee._1) / tradeInFee._2
+                                val devFeeAmountDivision: Long = (newCardValue * devFee._1) / devFee._2
 
-                            val tradeInFeeAmount: Long = (newCardValue * tradeInFee._1) / tradeInFee._2
-                            val devFeeAmount: Long = (newCardValue * devFeeAmount._1) / devFeeAmount._2
-                            //val playerAmount: Long = newCardValue - tradeInFeeAmount - devFeeAmount                            
+                                val tradeInFeeAmount: Long = if (tradeInFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                val devFeeAmount: Long = if (devFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                //val playerAmount: Long = newCardValue - tradeInFeeAmount - devFeeAmount                   
+                                
+                                val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - newCardValue)
+                                val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
+                                val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
+
+                                val validGameLPRegisterUpdate: Boolean = {
+
+                                    allOf(Coll(
+                                        (gameLPBoxOUT.R7[Long].get == newFactor),
+                                        (gameLPBoxOUT.R8[Long].get == newCount),
+                                        (gameLPBoxOUT.R9[Long].get == cardTokenBurnTotal + 1L)
+                                    ))
+
+                                }
                             
-                            val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - newCardValue)
-                            val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
-                            val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
-
-                            val validGameLPRegisterUpdate: Boolean = {
-
-                                allOf(Coll(
-                                    (gameLPBoxOUT.R7[Long].get == newFactor),
-                                    (gameLPBoxOUT.R8[Long].get == newCount),
-                                    (gameLPBoxOUT.R9[Long].get == cardTokenBurnTotal + 1L)
-                                ))
-
                             }
-                        
+
                         }
 
                     }
 
+                    val validCardTokenBurn: Boolean = {
+
+                        OUTPUTS.forall({ (output: Box) => 
+                        
+                            output.tokens.forall({ (t: (Coll[Byte], Long) => 
+                                t._1 != _CardTokenIssuerBox.id) 
+                            }) 
+                        })
+
+                    }
+
+                    allOf(Coll(
+                        validSelfRecreation.
+                        validTokens,
+                        validCardTokenBurn
+                    ))
+
                 }
 
-                val validCardTokenBurn: Boolean = {
-
-                    OUTPUTS.forall({ (output: Box) => 
-                    
-                        output.tokens.forall({ (t: (Coll[Byte], Long) => 
-                            t._1 != _CardTokenIssuerBox.id) 
-                        }) 
-                    })
-
-                }
+                val validTradeInFeeBoxOUT: Boolean = (tradeInFeeBoxOUT.propositionBytes == $TradeInFeeAddress.propBytes)
+                val validDevFeeBoxOUT: Boolean = (devFeeBoxOUT.propositionBytes == $DevAddress)
 
                 allOf(Coll(
-                    validSelfRecreation.
-                    validTokens,
-                    validCardTokenBurn
+                    validCard,
+                    validCardValueMappingBoxIN,
+                    validGameLPBoxOUT,
+                    validTradeInFeeBoxOUT,
+                    validDevFeeBoxOUT
                 ))
 
             }
-
-            val validTradeInFeeBoxOUT: Boolean = (tradeInFeeBoxOUT.propositionBytes == $TradeInFeeAddress.propBytes)
-            val validDevFeeBoxOUT: Boolean = (devFeeBoxOUT.propositionBytes == $DevAddress)
-
-            allOf(Coll(
-                validCard,
-                validCardValueMappingBoxIN,
-                validGameLPBoxOUT,
-                validTradeInFeeBoxOUT,
-                validDevFeeBoxOUT
-            ))
             
         }
 
         sigmaProp(validTradeInTx)
 
-    } else if (txType == 2) {
+    } else if (_TxType == 2) {
 
         // ===== Card-Value-Mapping Box Creation ===== //
 

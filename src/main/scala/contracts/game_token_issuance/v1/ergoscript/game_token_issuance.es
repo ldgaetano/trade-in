@@ -8,7 +8,7 @@
 
     // ===== Box Contents ===== //
     // Tokens: Coll[(Coll[Byte], Long)]
-    // 1. (GameTokenId, GameTokenAmount)
+    // 1. (GameTokenId, GameTokenAmount + 1)
     // Registers:
     // R4: Coll[Byte] GameTokenName
     // R5: Coll[Byte] GameTokenDescription
@@ -24,10 +24,7 @@
     // ===== Compile Time Constants ($) ===== //
     // $GameLPIssuanceContractBytes: Coll[Byte]
     // $GameLPContractBytes: Coll[Byte]
-    // $SafeStorageRentValue: Long
     // $DevPK: SigmaProp
-    // $DevAddress: Coll[Byte]
-    // $MinerFee: Long
 
     // ===== Context Variables (_) ===== //
     // None
@@ -43,15 +40,12 @@
         
         // Outputs    
         val gameLPBoxOUT: Box = OUTPUTS(0)
-        val minerFeeBoxOUT: Box = OUTPUTS(1)
 
         val validGameLPIssuanceBoxIN: Boolean = {
 
-            val validValue: Boolean = (gameLPIssuanceBoxIN.value == $SafeStorageRentValue)
             val validContract: Boolean = ($GameLPIssuanceContractBytes == gameLPIssuanceBoxIN.propositionBytes)
 
             allOf(Coll(
-                validValue,
                 validContract
             ))
 
@@ -59,29 +53,21 @@
 
         val validGameLPBoxOUT: Boolean = {
 
-            val validValue: Boolean = ($SafeStorageRentValue == gameLPBoxOUT.value)
-            val validContract: Boolean = ($GameLPContractBytes == gameLPBoxOUT.propositionBytes)
             val validTokens: Boolean = (gameLPBoxOUT.tokens(1) == (SELF.tokens(0)))
-            val validRegister: Boolean = (gameLPBoxOUT.R4[Coll[Byte]].get == $DevAddress)
 
             allOf(Coll(
-                validValue,
-                validContract,
-                validTokens,
-                validRegister
+                validTokens
             ))
             
         }
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == $MinerFee)
+        val validMinerFee: Boolean = (minerFeeBoxOUT.value == SELF.value)
 
-        val validOutputSize: Boolean = (OUTPUTS.size == 2)
 
         allOf(Coll(
             validGameLPIssuanceBoxIN,
             validGameLPBoxOUT,
-            validMinerFee,
-            validOutputSize
+            validMinerFee
         ))
 
     }

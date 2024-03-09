@@ -16,7 +16,7 @@ Tokens: Coll[(Coll[Byte], Long)]
 3. (CardValueMappingToken, 1)
 
 Registers:
-- R4: (Coll[(Long, Long)], (Coll[Byte], Coll[Byte])) (Coll(DevFee, TxOperatorFee), (DevAddress, GameTokenId))
+- R4: (Coll[(Long, Long)], Coll[Byte]) (Coll(DevFee, TradeInFee, TxOperatorFee), GameTokenId)
 - R5: Long       EmissionInterval
 - R6: Long       EmissionReductionFactorMultiplier
 - R7: Long       EmissionReductionFactor  
@@ -40,6 +40,8 @@ Registers:
 - $CardValueMappingContractBytes: Coll[Byte]
 - $PlayerProxyContractBytes: Coll[Byte]
 - $DevPK: SigmaProp
+- $DevAddress: Coll[Byte]
+- $TradeInFeeAddress: SigmaProp
 - $MinBoxValue: Long
 - $SetCreationMutliSigThreshold: Int
 - $SetCreationMultiSigAddresses: Coll[SigmaProp]

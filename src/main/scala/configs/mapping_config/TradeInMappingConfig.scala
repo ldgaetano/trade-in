@@ -1,9 +1,8 @@
 package configs.mapping_config
 
 import com.google.gson.{Gson, GsonBuilder}
-import configs.report_config.TradeInReportConfig
 
-import java.io.{File, FileReader, FileWriter}
+import java.io.{File, FileReader}
 import scala.util.Try
 
 case class TradeInMappingConfig(

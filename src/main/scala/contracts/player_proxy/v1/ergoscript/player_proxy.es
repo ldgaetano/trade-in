@@ -58,10 +58,7 @@
 
         // DataInputs
         val cardValueMappingBoxIN: Box = CONTEXT.dataInputs(0)
-        val cardValueMappingGameTokenId: Coll[Byte] = cardValueMappingBoxIN.R4[Coll[Byte]].get
-        val cardValueMappingCardSetCollectionTokenId: Coll[Byte] = cardValueMappingBoxIN.R5[Coll[Byte]].get
-        val cardValueMappingCardTokenId: Coll[Byte] = cardValueMappingBoxIN.R6[Coll[Byte]].get
-        val cardValueMappingCardValue: Long = cardValueMappingBoxIN.R7[Long].get
+        
 
         // Outputs
         val gameLPBoxOUT: Box = OUTPUTS(0)

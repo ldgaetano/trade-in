@@ -25,13 +25,13 @@
     
     // ===== Compile Time Constants ($) ===== //
     // $GameLPContractBytes: Coll[Byte]
-    // $DevPK: SigmaProp
+    // $DevPKGE: GroupElement
 
     // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //
-    // None
+    val devPK: SigmaProp = proveDlog($DevPKGE)
 
     // ===== Game LP Box Creation Tx ===== //
     val validGameLPBoxCreationTx: Boolean = {
@@ -66,6 +66,6 @@
 
     }
 
-    sigmaProp(validGameLPBoxCreationTx) && $DevPK
+    sigmaProp(validGameLPBoxCreationTx) && devPK
 
 }

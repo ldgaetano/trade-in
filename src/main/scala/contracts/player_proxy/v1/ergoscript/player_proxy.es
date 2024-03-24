@@ -12,11 +12,11 @@
     // Tokens: Coll[(Coll[Byte], Long)]
     // 1. (CardTokenId, 1)
     // Registers:
-    // R4: SigmaProp  PlayerPK
-    // R5: Coll[Byte] GameLPSingletonTokenId
-    // R6: Coll[Byte] GameTokenId
-    // R7: Coll[Byte] CardValueMappingTokenId
-    // R8: Long       MinerFee
+    // R4: GroupElement     PlayerPK
+    // R5: Coll[Byte]       GameLPSingletonTokenId
+    // R6: Coll[Byte]       GameTokenId
+    // R7: Coll[Byte]       CardValueMappingTokenId
+    // R8: Long             MinerFee
 
     // ===== Relevant Transactions ===== //
     // 1. Trade-In Tx
@@ -33,39 +33,40 @@
     // _CardTokenIssuerBox: Box
 
     // ===== Relevant Variables ===== //
-    val cardTokenId: Coll[Byte] = SELF.tokens(0)._1
-    val playerPK: SigmaProp = SELF.R4[SigmaProp].get
-    val gameLPSingletonTokenId: Coll[Byte] = SELF.R5[Coll[Byte]].get
-    val gameTokenId: Coll[Byte] = SELF.R6[Coll[Byte]].get
-    val cardValueMappingTokenId: Coll[Byte] = SELF.R7[Coll[Byte]].get
-    val minerFee: Long = SELF.R8[Long].get
-    val _CardSetCollectionIssuerBox: Box = getVar[Box](0).get
-    val _CardTokenIssuerBox: Box = getVar[Box](1).get
-    val cardSetCollectionTokenId: Coll[Byte] = _CardTokenIssuerBox.R7[Coll[Byte]].get
+    val cardTokenId: Coll[Byte]                     = SELF.tokens(0)._1
+    val playerPKGE: GroupElement                    = SELF.R4[GroupElement]get
+    val playerPK: SigmaProp                         = proveDlog(playerPKGE)
+    val gameLPSingletonTokenId: Coll[Byte]          = SELF.R5[Coll[Byte]].get
+    val gameTokenId: Coll[Byte]                     = SELF.R6[Coll[Byte]].get
+    val cardValueMappingTokenId: Coll[Byte]         = SELF.R7[Coll[Byte]].get
+    val minerFee: Long                              = SELF.R8[Long].get
+    val _CardSetCollectionIssuerBox: Box            = getVar[Box](0).get
+    val _CardTokenIssuerBox: Box                    = getVar[Box](1).get
+    val cardSetCollectionTokenId: Coll[Byte]        = _CardTokenIssuerBox.R7[Coll[Byte]].get
 
     // ===== Trade-In Tx ===== //
     val validTradeInTx: Boolean = {
 
         // Inputs
-        val gameLPBoxIN: Box = INPUTS(0)
-        val devFee: (Long, Long) = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(0)
-        val txOperatorFee: (Long, Long) = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(1)
-        val emissionInterval: Long = gameLPBoxIN.R5[Long].get
-        val emissionReductionFactorMultiplier: Long = gameLPBoxIN.R6[Long].get
-        val emissionReductionFactor: Long = gameLPBoxIN.R7[Long].get
-        val cardTokenBurnCount: Long = gameLPBoxIN.R8[Long].get
-        val cardTokenBurnTotal: Long = gameLPBoxIN.R9[Long].get
+        val gameLPBoxIN: Box                            = INPUTS(0)
+        val devFee: (Long, Long)                        = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(0)
+        val txOperatorFee: (Long, Long)                 = gameLPBoxIN.R4[(Coll[(Long, Long)], (Coll[Byte], Coll[Byte]))].get._1(1)
+        val emissionInterval: Long                      = gameLPBoxIN.R5[Long].get
+        val emissionReductionFactorMultiplier: Long     = gameLPBoxIN.R6[Long].get
+        val emissionReductionFactor: Long               = gameLPBoxIN.R7[Long].get
+        val cardTokenBurnCount: Long                    = gameLPBoxIN.R8[Long].get
+        val cardTokenBurnTotal: Long                    = gameLPBoxIN.R9[Long].get
 
         // DataInputs
         val cardValueMappingBoxIN: Box = CONTEXT.dataInputs(0)
         
 
         // Outputs
-        val gameLPBoxOUT: Box = OUTPUTS(0)
-        val playerPKBoxOUT: Box = OUTPUTS(1)
-        val devAddressBoxOUT: Box = OUTPUTS(2)
-        val txOperatorBoxOUT: Box = OUTPUTS(3)
-        val minerFeeBoxOUT: Box = OUTPUTS(4)
+        val gameLPBoxOUT: Box       = OUTPUTS(0)
+        val playerPKBoxOUT: Box     = OUTPUTS(1)
+        val devAddressBoxOUT: Box   = OUTPUTS(2)
+        val txOperatorBoxOUT: Box   = OUTPUTS(3)
+        val minerFeeBoxOUT: Box     = OUTPUTS(4)
 
         // Inputs checks
         val validInputs: Boolean = {

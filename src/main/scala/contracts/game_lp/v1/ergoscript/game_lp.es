@@ -37,12 +37,12 @@
     
     // ===== Compile Time Constants ($) ===== //
     // $CardValueMappingContractBytes: Coll[Byte]
-    // $DevPK: SigmaProp
+    // $DevPKGE: GroupElement
     // $DevAddress: Coll[Byte]
-    // $TradeInFeeAddress: SigmaProp
+    // $TradeInFeeAddress: Coll[Byte]
     // $MinBoxValue: Long
     // $SetCreationMultiSigThreshold: Int
-    // $SetCreationMultiSigAddresses: Coll[SigmaProp]
+    // $SetCreationMultiSigAddressesGE: Coll[GroupElement]
     // $PecisionFactor: Long
 
     // ===== Context Variables (_) ===== //
@@ -55,19 +55,21 @@
     // 2 => Card-Value-Mapping Box Creation Tx
 
     // ===== Relevant Variables ===== //
-    val gameLPSingletonToken: (Coll[Byte], Long)    = SELF.tokens(0)
-    val gameTokenId: Coll[Byte]                     = SELF.tokens(1)._1
-    val tradeInFee: (Long, Long)                    = SELF.R4[Coll[(Long, Long)]].get(0)
-    val devFee: (Long, Long)                        = SELF.R4[Coll[(Long, Long)]].get(1) 
-    val emissionInterval: Long                      = SELF.R5[Long].get
-    val emissionReductionFactorMultiplier: Long     = SELF.R6[Long].get
-    val emissionReductionFactor: Long               = SELF.R7[Long].get
-    val cardTokenBurnCount: Long                    = SELF.R8[Long].get
-    val cardTokenBurnTotal: Long                    = SELF.R9[Long].get
-    val _TxType: Byte                               = getVar[Byte](0).get
-    val _CardSetCollectionIssuerBox: Box            = getVar[Box](1).get
-    val _CardTokenIssuerBox: Box                    = getVar[Box](2).get
-    val cardSetCollectionTokenId: Coll[Byte]        = _CardTokenIssuerBox.R7[Coll[Byte]].get
+    val gameLPSingletonToken: (Coll[Byte], Long)        = SELF.tokens(0)
+    val gameTokenId: Coll[Byte]                         = SELF.tokens(1)._1
+    val tradeInFee: (Long, Long)                        = SELF.R4[Coll[(Long, Long)]].get(0)
+    val devFee: (Long, Long)                            = SELF.R4[Coll[(Long, Long)]].get(1) 
+    val emissionInterval: Long                          = SELF.R5[Long].get
+    val emissionReductionFactorMultiplier: Long         = SELF.R6[Long].get
+    val emissionReductionFactor: Long                   = SELF.R7[Long].get
+    val cardTokenBurnCount: Long                        = SELF.R8[Long].get
+    val cardTokenBurnTotal: Long                        = SELF.R9[Long].get
+    val _TxType: Byte                                   = getVar[Byte](0).get
+    val _CardSetCollectionIssuerBox: Box                = getVar[Box](1).get
+    val _CardTokenIssuerBox: Box                        = getVar[Box](2).get
+    val cardSetCollectionTokenId: Coll[Byte]            = _CardTokenIssuerBox.R7[Coll[Byte]].get
+    val devPK: SigmaProp                                = proveDlog($DevPKGE)
+    val cetCreationMultiSigAddresses: Coll[SigmaProp]   = $SetCreationMultiSigAddressesGE.map((ge: GroupElement) => proveDlog(ge))
 
     if (_TxType == 1) {
 
@@ -251,7 +253,7 @@
 
                 }
 
-                val validTradeInFeeBoxOUT: Boolean = (tradeInFeeBoxOUT.propositionBytes == $TradeInFeeAddress.propBytes)
+                val validTradeInFeeBoxOUT: Boolean = (tradeInFeeBoxOUT.propositionBytes == $TradeInFeeAddress)
                 val validDevFeeBoxOUT: Boolean = (devFeeBoxOUT.propositionBytes == $DevAddress)
 
                 allOf(Coll(
@@ -357,12 +359,12 @@
 
             if (isInitialCreation) {
 
-                $DevPK
+                devPK
 
 
             } else {
 
-                atLeast($SetCreationMultiSigThreshold, $SetCreationMultiSigAddresses)
+                atLeast($SetCreationMultiSigThreshold, setCreationMultiSigAddresses)
 
             }
 

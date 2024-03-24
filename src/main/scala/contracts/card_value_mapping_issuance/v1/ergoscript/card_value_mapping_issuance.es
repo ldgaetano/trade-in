@@ -27,14 +27,14 @@
     // $CardValueMappingContractBytes: Coll[Byte]
     // $CardSetSize: Long
     // $SafeStorageRentValue: Long
-    // $DevPK: SigmaProp
+    // $DevPK: GroupElement
     // $MinerFee: Long
 
     // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //
-    // None
+    val devPK: SigmaProp = proveDlog($DevPK)
 
     // ===== Card Value Mapping Box Creation Tx ===== //
     val validCardValueMappingBoxCreationTx: Boolean = {
@@ -76,6 +76,6 @@
 
     }
 
-    sigmaProp(validCardValueMappingBoxCreationTx) && $DevPK
+    sigmaProp(validCardValueMappingBoxCreationTx) && devPK
 
 }

@@ -60,7 +60,6 @@
         // DataInputs
         val cardValueMappingBoxIN: Box = CONTEXT.dataInputs(0)
         
-
         // Outputs
         val gameLPBoxOUT: Box       = OUTPUTS(0)
         val playerPKBoxOUT: Box     = OUTPUTS(1)

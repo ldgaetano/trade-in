@@ -28,13 +28,13 @@
     // $CardSetSize: Long
     // $SafeStorageRentValue: Long
     // $DevPK: GroupElement
-    // $MinerFee: Long
 
     // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //
     val devPK: SigmaProp = proveDlog($DevPK)
+    val minerFee: Long = SELF.R4[Long].get
 
     // ===== Card Value Mapping Box Creation Tx ===== //
     val validCardValueMappingBoxCreationTx: Boolean = {
@@ -63,7 +63,7 @@
         
         })
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == $MinerFee)
+        val validMinerFee: Boolean = (minerFeeBoxOUT.value == minerFee)
 
         val validOutputSize: Boolean = (OUTPUTS.size == ($CardSetSize + 1L).toInt)
 

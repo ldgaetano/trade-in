@@ -28,12 +28,17 @@
     // Inputs: GameLP, PlayerProxy
     // DataInputs: CardValueMapping
     // Outputs: GameLP, TradeInFee, PlayerPK, DevAddress, TxOperator, MinerFee
-    // Context Variables: None
+    // Context Variables: TxType, CardSetCollectionIssuerBox, CardTokenIssuerBox
     // 2. Card-Value-Mapping Box Creation Tx
     // Inputs: GameLP, CardValueMappingIssuance
     // DataInputs: None
     // Outputs: GameLP, CardValueMapping1, ... , CardValueMappingN, MinerFee
-    // Context Variables: None
+    // Context Variables: TxType
+    // 3. Storage Rent Top Up Tx
+    // Inputs: GameLP, StorageRentTopUp
+    // DataInputs: None
+    // Outputs: GameLP, MinerFee
+    // Context Variables: TxType
     
     // ===== Compile Time Constants ($) ===== //
     // $CardValueMappingContractBytes: Coll[Byte]
@@ -46,13 +51,14 @@
     // $PecisionFactor: Long
 
     // ===== Context Variables (_) ===== //
-    // _TransactionType: Byte
+    // _TxType: Byte
     // _CardSetCollectionIssuerBox: Box
     // _CardTokenIssuerBox: Box
 
     // ===== Transaction Types ===== //
     // 1 => Trade-In Tx
     // 2 => Card-Value-Mapping Box Creation Tx
+    // 3 => Storage Rent Top-Up
 
     // ===== Relevant Variables ===== //
     val gameLPSingletonToken: (Coll[Byte], Long)        = SELF.tokens(0)
@@ -65,9 +71,6 @@
     val cardTokenBurnCount: Long                        = SELF.R8[Long].get
     val cardTokenBurnTotal: Long                        = SELF.R9[Long].get
     val _TxType: Byte                                   = getVar[Byte](0).get
-    val _CardSetCollectionIssuerBox: Box                = getVar[Box](1).get
-    val _CardTokenIssuerBox: Box                        = getVar[Box](2).get
-    val cardSetCollectionTokenId: Coll[Byte]            = _CardTokenIssuerBox.R7[Coll[Byte]].get
     val devPK: SigmaProp                                = proveDlog($DevPKGE)
     val cetCreationMultiSigAddresses: Coll[SigmaProp]   = $SetCreationMultiSigAddressesGE.map((ge: GroupElement) => proveDlog(ge))
 
@@ -75,6 +78,11 @@
 
         // ===== Trade-In Tx ===== //
         val validTradeInTx: Boolean = {
+
+            // Relevant Variables
+            val _CardSetCollectionIssuerBox: Box        = getVar[Box](1).get
+            val _CardTokenIssuerBox: Box                = getVar[Box](2).get
+            val cardSetCollectionTokenId: Coll[Byte]    = _CardTokenIssuerBox.R7[Coll[Byte]].get
 
             // Check if there is anything left in the bank
             if (SELF.tokens(1)._2 == 1) {
@@ -152,7 +160,7 @@
                             (gameLPBoxOUT.tokens.slice(2, gameLPBoxOUT.tokens.size) == SELF.tokens.slice(2, SELF.tokens.size)),
                             (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
                             (gameLPBoxOUT.R4[Coll[(Long, Long)]].get == SELF.R4[Coll[(Long, Long)]].get),
-                            (gameLPBoxOUT.R5[Long].get == emissio_CardTokenIssuerBoxnInterval),
+                            (gameLPBoxOUT.R5[Long].get == emissionInterval),
                             (gameLPBoxOUT.R6[Long].get == emissionReductionFactorMultiplier)
                         ))
 
@@ -369,6 +377,39 @@
             }
 
         } 
+
+    } else if (_TxType == 3) {
+
+        val validStorageRentTopUpTx: Boolean = {
+
+            // Outputs
+            val gameLPBoxOut: Box = OUTPUTS(0)
+
+            val validTopUp: Boolean = (gameLPBoxOut.value > SELF.value)
+
+            val validSelfRecreation: Boolean = {
+
+                allOf(Coll(
+                    (gameLPBoxOUT.tokens == SELF.tokens),
+                    (gameLPBoxOUT.propositionBytes == SELF.propositionBytes),
+                    (gameLPBoxOUT.R4[Coll[(Long, Long)]].get == SELF.R4[Coll[(Long, Long)]].get),
+                    (gameLPBoxOUT.R5[Long].get == SELF.R5[Long].get),
+                    (gameLPBoxOUT.R6[Long].get == SELF.R6[Long].get),
+                    (gameLPBoxOUT.R7[Long].get == SELF.R7[Long].get),
+                    (gameLPBoxOUT.R8[Long].get == SELF.R8[Long].get),
+                    (gameLPBoxOUT.R9[Long].get == SELF.R9[Long].get)
+                ))
+
+            }
+
+            allOf(Coll(
+                validTopUp,
+                validSelfRecreation
+            ))
+
+        }
+
+        sigmaProp(validStorageRentTopUpTx) && devPK
 
     } else {
         sigmaProp(false)

@@ -35,6 +35,7 @@
     // ===== Relevant Variables ===== //
     val devPK: SigmaProp = proveDlog($DevPK)
     val minerFee: Long = SELF.R4[Long].get
+    val minerFeeErgoTreeBytesHash: Coll[Byte] = fromBase16("e540cceffd3b8dd0f401193576cc413467039695969427df94454193dddfb375")
 
     // ===== Card Value Mapping Box Creation Tx ===== //
     val validCardValueMappingBoxCreationTx: Boolean = {
@@ -63,8 +64,15 @@
         
         })
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == minerFee)
+        val validMinerFee: Boolean = {
 
+            allOf(Coll(
+                (minerFeeBoxOUT.value == minerFee),
+                (blake2b256(minerFeeBoxOUT.propositionBytes) == minerFeeErgoTreeBytesHash)
+            ))
+
+        }
+        
         val validOutputSize: Boolean = (OUTPUTS.size == ($CardSetSize + 1L).toInt)
 
         allOf(Coll(

@@ -31,6 +31,7 @@
 
     // ===== Relevant Variables ===== //
     val devPK: SigmaProp = proveDlog($DevPKGE)
+    val minerFeeErgoTreeBytesHash: Coll[Byte] = fromBase16("e540cceffd3b8dd0f401193576cc413467039695969427df94454193dddfb375")
 
     // ===== Game LP Box Creation Tx ===== //
     val validGameLPBoxCreationTx: Boolean = {
@@ -61,8 +62,14 @@
             
         }
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == SELF.value)
+        val validMinerFee: Boolean = {
 
+            allOf(Coll(
+                (minerFeeBoxOUT.value == SELF.value),
+                (blake2b256(minerFeeBoxOUT.propositionBytes) == minerFeeErgoTreeBytesHash)
+            ))
+
+        }
 
         allOf(Coll(
             validGameLPIssuanceBoxIN,

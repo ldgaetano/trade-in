@@ -60,6 +60,23 @@
     // 2 => Card-Value-Mapping Box Creation Tx
     // 3 => Storage Rent Top-Up
 
+    // ===== User Defined Functions ===== //
+    // divUp: (Long, Long) => BigInt
+
+    // Integer division, rounded up.
+    def divUp(operands: (Long, Long)): Long = {
+
+        val a: Long = operands._1 // Dividend
+        val b: Long = operands._2 // Divisor
+
+        if (b == 0L) {
+            -1L
+        } else {
+            (a + (b-1L)) / b
+        }
+
+    } 
+
     // ===== Relevant Variables ===== //
     val gameLPSingletonToken: (Coll[Byte], Long)        = SELF.tokens(0)
     val gameTokenId: Coll[Byte]                         = SELF.tokens(1)._1
@@ -98,8 +115,8 @@
 
                 // Outputs
                 val gameLPBoxOUT: Box       = OUTPUTS(0)
-                val tradeInFeeBoxOUT: Box   = OUTPUTS(1)
-                val devFeeBoxOUT: Box       = OUTPUTS(2)
+                // val tradeInFeeBoxOUT: Box   = OUTPUTS(1)
+                // val devFeeBoxOUT: Box       = OUTPUTS(2)
 
                 val validCard: Boolean = {
 
@@ -173,22 +190,20 @@
                         val validGameTokenTransfer: Boolean = {
 
                             if (cardTokenBurnCount < emissionInterval) { // We do not reduce the value of the card yet.
-
-                                val cardValueDivision: Long = maxCardValue / emissionReductionFactor
-                                val cardValue: Long = if (cardValueDivision == 0L) precisionFactor else cardValueDivision
+                                
+                                val operands: (Long, Long) = (maxCardValue, emissionReductionFactor)
+                                val cardValue: Long = divUp(operands)
                                 val newCount: Long = cardTokenBurnCount + 1L
-
-                                val tradeInFeeAmountDivision: Long = (cardValue * tradeInFee._1) / tradeInFee._2
-                                val devFeeAmountDivision: Long = (cardValue * devFee._1) / devFee._2
-
-                                val tradeInFeeAmount: Long = if (tradeInFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
-                                val devFeeAmount: Long = if (devFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                
+                                val tradeInOperands: (Long, Long) = ((cardValue * tradeInFee._1), tradeInFee._2)
+                                val devOperands: (Long, Long) = ((cardValue * devFee._1), devFee._2)
+                                val tradeInFeeAmount: Long = if (cardValue <= 1L + tradeInFee._1 + devFee._1) 0L else divUp(tradeInOperands)
+                                val devFeeAmount: Long = if (cardValue <= 1L + tradeInFee._1 + devFee._1) 0L else divUp(devOperands)
                                 //val playerAmount: Long = cardValue - tradeInFeeAmount - devFeeAmount
 
-
                                 val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - cardValue)        
-                                val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
-                                val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount)) 
+                                val validTradeInFeeTransfer: Boolean = if (tradeInFeeAmount == 0L) true else (OUTPUTS(1).tokens(0) == (gameTokenId, tradeInFeeAmount))
+                                val validDevFeeTransfer: Boolean = if (devFeeAmount == 0L) true else (OUTPUTS(2).tokens(0) == (gameTokenId, devFeeAmount)) 
                                 
                                 val validGameLPRegisterUpdate: Boolean = {
 
@@ -211,20 +226,18 @@
 
                                 val newCount: Long = 1L
                                 val newFactor: Long = emissionReductionFactorMultiplier * emissionReductionFactor
-                                val newCardValueDivision: Long = maxCardValue / newFactor
+                                val operands: (Long, Long) = (maxCardValue, newFactor)
+                                val newCardValue: Long = divUp(operands)
 
-                                val newCardValue: Long = if (newCardValueDivision == 0L) precisionFactor else newCardValueDivision
-
-                                val tradeInFeeAmountDivision: Long = (newCardValue * tradeInFee._1) / tradeInFee._2
-                                val devFeeAmountDivision: Long = (newCardValue * devFee._1) / devFee._2
-
-                                val tradeInFeeAmount: Long = if (tradeInFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
-                                val devFeeAmount: Long = if (devFeeAmountDivision == 0L) precisionFactor else tradeInFeeAmountDivision
+                                val tradeInOperands: (Long, Long) = ((newCardValue * tradeInFee._1), tradeInFee._2)
+                                val devOperands: (Long, Long) = ((newCardValue * devFee._1), devFee._2)
+                                val tradeInFeeAmount: Long = if (newCardValue <= 1L + tradeInFee._1 + devFee._1) 0L else divUp(tradeInOperands)
+                                val devFeeAmount: Long = if (cardValue <= 1L + tradeInFee._1 + devFee._1) 0L else divUp(devOperands)
                                 //val playerAmount: Long = newCardValue - tradeInFeeAmount - devFeeAmount                   
                                 
                                 val validGameLPWithdraw: Boolean = (gameLPBoxOUT.tokens(1)._2 == SELF.tokens(1)._2 - newCardValue)
-                                val validTradeInFeeTransfer: Boolean = (tradeInFeeBoxOUT.tokens(0) == (gameTokenId, tradeInFeeAmount))
-                                val validDevFeeTransfer: Boolean = (devFeeBoxOUT.tokens(0) == (gameTokenId, devFeeAmount))
+                                val validTradeInFeeTransfer: Boolean = if (tradeInFeeAmount == 0L) true else (OUTPUTS(1).tokens(0) == (gameTokenId, tradeInFeeAmount))
+                                val validDevFeeTransfer: Boolean = if (devFeeAmount == 0L) true else (OUTPUTS(2).tokens(0) == (gameTokenId, devFeeAmount))
 
                                 val validGameLPRegisterUpdate: Boolean = {
 
@@ -261,8 +274,8 @@
 
                 }
 
-                val validTradeInFeeBoxOUT: Boolean = (tradeInFeeBoxOUT.propositionBytes == $TradeInFeeAddress)
-                val validDevFeeBoxOUT: Boolean = (devFeeBoxOUT.propositionBytes == $DevAddress)
+                val validTradeInFeeBoxOUT: Boolean = if (OUTPUTS.size == 3) true else (OUTPUTS(1).propositionBytes == $TradeInFeeAddress)
+                val validDevFeeBoxOUT: Boolean = if (OUTPUTS.size == 3) true else (OUTPUTS(2).propositionBytes == $DevAddress)
 
                 allOf(Coll(
                     validCard,

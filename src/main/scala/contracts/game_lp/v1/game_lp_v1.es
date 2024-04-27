@@ -27,7 +27,7 @@
     // 1. Trade In Tx
     // Inputs: GameLP, PlayerProxy
     // DataInputs: CardValueMapping
-    // Outputs: GameLP, TradeInFee, PlayerPK, DevAddress, TxOperator, MinerFee
+    // Outputs: GameLP, TradeInFee, DevFee, PlayerPK, TxOperator, MinerFee
     // Context Variables: TxType, CardSetCollectionIssuerBox, CardTokenIssuerBox
     // 2. Card-Value-Mapping Box Creation Tx
     // Inputs: GameLP, CardValueMappingIssuance

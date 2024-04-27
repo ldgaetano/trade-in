@@ -21,7 +21,7 @@
     // 1. Trade-In Tx
     // Inputs: GameLP, PlayerProxy
     // DataInputs: CardValueMapping
-    // Outputs: GameLP, PlayerPK, DevAddress, TxOperator, MinerFee
+    // Outputs: GameLP, TradeInFee, DevFee, PlayerPK, TxOperator, MinerFee
     // Context Variables: CardTokenIssuerBox, CardSetCollectionIssuerBox
     
     // ===== Compile Time Constants ($) ===== //

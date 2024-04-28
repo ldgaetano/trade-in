@@ -26,7 +26,7 @@
     },
     "cardValueMappingBoxCreation": {
       "cardSetCollectionTokenId": "",
-      "cardSetSize": ""
+      "cardSetSize": 0
     },
     "setCreationMultiSig": {
       "threshold": 1,

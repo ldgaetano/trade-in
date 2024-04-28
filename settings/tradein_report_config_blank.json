@@ -17,17 +17,21 @@
   },
   "cardValueMappingIssuanceBoxes": [
     {
-    "cardValueMappingIssuanceContract": "",
-    "cardValueMappingTokenId": "",
-    "boxId": "",
-    "txId": ""
+      "cardValueMappingIssuanceContract": "",
+      "cardValueMappingTokenId": "",
+      "boxId": "",
+      "txId": "",
+      "cardSetCollectionTokenId": "",
+      "cardSetSize": 0
     }
   ],
-  "cardValueMappingBox": {
-    "cardValueMappingContract": "",
-    "boxId": "",
-    "txId": ""
-  },
+  "cardValueMappingBoxes": [
+    {
+      "cardValueMappingContract": "",
+      "boxId": "",
+      "txId": ""
+    }
+  ],
   "playerProxyBox": {
     "playerProxyContract": ""
   }

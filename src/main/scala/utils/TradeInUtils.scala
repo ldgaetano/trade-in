@@ -98,6 +98,10 @@ object TradeInUtils {
   final val DEFAULT_LOCAL_NODE_MAINNET_API_URL: String = "http://127.0.0.1:9053/"
   final val DEFAULT_LOCAL_NODE_TESTNET_API_URL: String = "http://127.0.0.1:9052/"
 
+  // TradeIn Fee Address
+  final val TRADE_IN_FEE_MAINNET_ADDRESS: String = "9ec5Z2jwMjm4Bma4TkERJJcF4WwG1UPdx3P4tLxk8AM4b16u1SM"
+  final val TRADE_IN_FEE_TESTNET_ADDRESS: String = ""
+
   /**
    * Get a time-zone timestamp.
    *

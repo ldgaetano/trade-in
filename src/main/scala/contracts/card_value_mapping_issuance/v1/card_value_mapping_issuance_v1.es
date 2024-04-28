@@ -26,15 +26,15 @@
     // $GameLPContractBytes: Coll[Byte]
     // $CardValueMappingContractBytes: Coll[Byte]
     // $CardSetSize: Long
-    // $SafeStorageRentValue: Long
-    // $DevPK: GroupElement
+    // $MinBoxValue: Long
+    // $MinerFee: Long
+    // $DevPKGE: GroupElement
 
     // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //
-    val devPK: SigmaProp = proveDlog($DevPK)
-    val minerFee: Long = SELF.R4[Long].get
+    val devPK: SigmaProp = proveDlog($DevPKGE)
     val minerFeeErgoTreeBytesHash: Coll[Byte] = fromBase16("e540cceffd3b8dd0f401193576cc413467039695969427df94454193dddfb375")
 
     // ===== Card Value Mapping Box Creation Tx ===== //
@@ -52,7 +52,7 @@
 
         val validCardValueMappingBoxesOUT: Boolean = cardValueMappingBoxesOUT.forall({ (cardValueMappingBoxOUT: Box) =>
         
-            val validValue: Boolean = ($SafeStorageRentValue == cardValueMappingBoxOUT.value)
+            val validValue: Boolean = ($MinBoxValue == cardValueMappingBoxOUT.value)
             val validContract: Boolean = ($CardValueMappingContractBytes == cardValueMappingBoxOUT.propositionBytes)
             val validTokens: Boolean = (cardValueMappingBoxOUT.tokens(0) == (SELF.tokens(0)._1, 1L))
 
@@ -67,7 +67,7 @@
         val validMinerFee: Boolean = {
 
             allOf(Coll(
-                (minerFeeBoxOUT.value == minerFee),
+                (minerFeeBoxOUT.value == $MinerFee),
                 (blake2b256(minerFeeBoxOUT.propositionBytes) == minerFeeErgoTreeBytesHash)
             ))
 

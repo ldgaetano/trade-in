@@ -6,14 +6,12 @@ import org.ergoplatform.appkit._
 import special.collection.Coll
 import special.sigma.SigmaProp
 import utils.TradeInUtils
+import special.sigma.GroupElement
 
 case class GameTokenIssuanceContractBuilder(
                                              gameLPIssuanceContractBytes: ErgoValue[Coll[java.lang.Byte]],
                                              gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]],
-                                             safeStorageRentValue: Long,
-                                             devPK: ErgoValue[SigmaProp],
-                                             devAddress: ErgoValue[Coll[java.lang.Byte]],
-                                             minerFee: Long
+                                             devPKGE: ErgoValue[GroupElement],
                                            ) extends TokenIssuanceContractBuilder {
 
     override val script: String = TradeInUtils.GAME_TOKEN_ISSUANCE_SCRIPT
@@ -24,10 +22,7 @@ case class GameTokenIssuanceContractBuilder(
             ConstantsBuilder.create()
               .item("$GameLPIssuanceContractBytes", gameLPIssuanceContractBytes.getValue)
               .item("$GameLPContractBytes", gameLPContractBytes.getValue)
-              .item("$SafeStorageRentValue", safeStorageRentValue)
-              .item("$DevPK", devPK.getValue)
-              .item("$DevAddress", devAddress.getValue)
-              .item("$MinerFee", minerFee)
+              .item("$DevPKGE", devPKGE.getValue)
               .build(),
             script
         )
@@ -44,23 +39,18 @@ object GameTokenIssuanceContractBuilder {
 
         val lpContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
 
-        val devPK: ErgoValue[SigmaProp] = ErgoValue.of(Address.createEip3Address(
+        val devPKGE: ErgoValue[GroupElement] = ErgoValue.of(Address.createEip3Address(
             setupConfig.node.wallet.index,
             setupConfig.node.networkType,
             SecretString.create(setupConfig.node.wallet.mnemonic),
             SecretString.create(setupConfig.node.wallet.password),
             false
-        ).getSigmaBoolean)
-
-        val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes)
+        ).getPublicKeyGE())
 
         new GameTokenIssuanceContractBuilder(
             lpIssuanceContract,
             lpContract,
-            TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears),
-            devPK,
-            devAddress,
-            setupConfig.settings.minerFeeInNanoERG
+            devPKGE
         )
 
     }

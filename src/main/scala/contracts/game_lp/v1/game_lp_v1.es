@@ -45,10 +45,8 @@
     // $DevPKGE: GroupElement
     // $DevAddress: Coll[Byte]
     // $TradeInFeeAddress: Coll[Byte]
-    // $MinBoxValue: Long
     // $SetCreationMultiSigThreshold: Int
     // $SetCreationMultiSigAddressesGE: Coll[GroupElement]
-    // $PecisionFactor: Long
 
     // ===== Context Variables (_) ===== //
     // _TxType: Byte

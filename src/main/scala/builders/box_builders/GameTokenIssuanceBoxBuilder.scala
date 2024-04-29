@@ -7,13 +7,13 @@ import org.ergoplatform.appkit._
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 
 case class GameTokenIssuanceBoxBuilder(
-                               gameTokenBoxValue: Long,
-                               gameTokenBoxContract: ErgoContract,
+                               gameTokenIssuanceBoxValue: Long,
+                               gameTokenIssuanceContract: ErgoContract,
                                gameToken: Eip4Token
                                ) extends EIP4TokenIssuanceBoxBuilder {
 
-  override val value: Long = gameTokenBoxValue
-  override val contract: ErgoContract = gameTokenBoxContract
+  override val value: Long = gameTokenIssuanceBoxValue
+  override val contract: ErgoContract = gameTokenIssuanceContract
   override val eip4Token: Eip4Token = gameToken
 
   override def toOutBox(implicit outBoxBuilder: OutBoxBuilder): OutBox = {
@@ -28,9 +28,11 @@ case class GameTokenIssuanceBoxBuilder(
 
 object GameTokenIssuanceBoxBuilder {
 
+  // Take an existing input box that was created as a GameTokenIssuanceBox output,
+  // and convert it to an instance of the GameTokenIssuanceBox.
   def apply(input: InputBox)(implicit ctx: BlockchainContext): Option[GameTokenIssuanceBoxBuilder] = {
 
-    if (input.getTokens.size() == 1) {
+      if (input.getTokens.size() == 1) {
 
       Some(GameTokenIssuanceBoxBuilder(
         input.getValue,

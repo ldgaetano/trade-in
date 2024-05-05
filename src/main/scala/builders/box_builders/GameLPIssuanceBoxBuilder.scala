@@ -26,6 +26,8 @@ object GameLPIssuanceBoxBuilder {
 
   def apply(input: InputBox)(implicit ctx: BlockchainContext): Option[GameLPIssuanceBoxBuilder] = {
 
+    // Take an existing input box that was created as a GameLPIssuanceBox output,
+    // and convert it to an instance of the GameLPIssuanceBox.
     if (input.getTokens.size == 1) {
 
       Some(GameLPIssuanceBoxBuilder(

@@ -8,7 +8,7 @@
 
     // ===== Box Contents ===== //
     // Tokens: Coll[(Coll[Byte], Long)]
-    // 1. (GameTokenId, GameTokenAmount)
+    // 1. (GameTokenId, GameTokenAmount + 1)
     // Registers:
     // R4: Coll[Byte] GameTokenName
     // R5: Coll[Byte] GameTokenDescription
@@ -24,16 +24,14 @@
     // ===== Compile Time Constants ($) ===== //
     // $GameLPIssuanceContractBytes: Coll[Byte]
     // $GameLPContractBytes: Coll[Byte]
-    // $SafeStorageRentValue: Long
-    // $DevPK: SigmaProp
-    // $DevAddress: Coll[Byte]
-    // $MinerFee: Long
+    // $DevPKGE: GroupElement
 
     // ===== Context Variables (_) ===== //
     // None
 
     // ===== Relevant Variables ===== //
-    // None
+    val devPK: SigmaProp = proveDlog($DevPKGE)
+    val minerFeeErgoTreeBytesHash: Coll[Byte] = fromBase16("e540cceffd3b8dd0f401193576cc413467039695969427df94454193dddfb375")
 
     // ===== Game LP Box Creation Tx ===== //
     val validGameLPBoxCreationTx: Boolean = {
@@ -43,15 +41,12 @@
         
         // Outputs    
         val gameLPBoxOUT: Box = OUTPUTS(0)
-        val minerFeeBoxOUT: Box = OUTPUTS(1)
 
         val validGameLPIssuanceBoxIN: Boolean = {
 
-            val validValue: Boolean = (gameLPIssuanceBoxIN.value == $SafeStorageRentValue)
             val validContract: Boolean = ($GameLPIssuanceContractBytes == gameLPIssuanceBoxIN.propositionBytes)
 
             allOf(Coll(
-                validValue,
                 validContract
             ))
 
@@ -59,33 +54,31 @@
 
         val validGameLPBoxOUT: Boolean = {
 
-            val validValue: Boolean = ($SafeStorageRentValue == gameLPBoxOUT.value)
-            val validContract: Boolean = ($GameLPContractBytes == gameLPBoxOUT.propositionBytes)
             val validTokens: Boolean = (gameLPBoxOUT.tokens(1) == (SELF.tokens(0)))
-            val validRegister: Boolean = (gameLPBoxOUT.R4[Coll[Byte]].get == $DevAddress)
 
             allOf(Coll(
-                validValue,
-                validContract,
-                validTokens,
-                validRegister
+                validTokens
             ))
             
         }
 
-        val validMinerFee: Boolean = (minerFeeBoxOUT.value == $MinerFee)
+        val validMinerFee: Boolean = {
 
-        val validOutputSize: Boolean = (OUTPUTS.size == 2)
+            allOf(Coll(
+                (minerFeeBoxOUT.value == SELF.value),
+                (blake2b256(minerFeeBoxOUT.propositionBytes) == minerFeeErgoTreeBytesHash)
+            ))
+
+        }
 
         allOf(Coll(
             validGameLPIssuanceBoxIN,
             validGameLPBoxOUT,
-            validMinerFee,
-            validOutputSize
+            validMinerFee
         ))
 
     }
 
-    sigmaProp(validGameLPBoxCreationTx) && $DevPK
+    sigmaProp(validGameLPBoxCreationTx) && devPK
 
 }

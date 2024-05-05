@@ -4,10 +4,10 @@ case class TradeInSettingsConfig(
                                gameTokenMinting: TradeInGameTokenMintingConfig,
                                gameLPBoxCreation: TradeInGameLPBoxCreationConfig,
                                cardValueMappingBoxCreation: TradeInCardValueMappingBoxCreationConfig,
+                               setCreationMultiSig: TradeInSetCreationMutliSigConfig,
                                devAddress: String,
-                               protocolPeriodInYears: Long,
                                devFeeInGameTokenPercentage: Double,
-                               txOperatorFeeInGameTokenPercentage: Double,
+                               txOperatorFeeInNanoErg: Long,
                                minerFeeInNanoERG: Long
                              )
 {}

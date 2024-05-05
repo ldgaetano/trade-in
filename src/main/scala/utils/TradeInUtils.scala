@@ -34,12 +34,12 @@ object TradeInUtils {
   final val TRADEIN_GAME_TOKEN_IMG_DIRECTORY_PATH: String = "img/"
 
   // ErgoScript contracts
-  final val GAME_TOKEN_ISSUANCE_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/game_token_issuance/v1/ergoscript/game_token_issuance.es")).stripMargin
-  final val GAME_LP_ISSUANCE_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/game_lp_issuance/v1/ergoscript/game_lp_issuance.es")).stripMargin
-  final val GAME_LP_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/game_lp/v1/ergoscript/game_lp.es")).stripMargin
-  final val CARD_VALUE_MAPPING_ISSUANCE_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/card_value_mapping_issuance/v1/ergoscript/card_value_mapping_issuance.es")).stripMargin
-  final val CARD_VALUE_MAPPING_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/card_value_mapping/v1/ergoscript/card_value_mapping.es")).stripMargin
-  final val PLAYER_PROXY_SCRIPT: String = Files.readString(Paths.get("src/main/scala/contracts/player_proxy/v1/ergoscript/player_proxy.es")).stripMargin
+  final val GAME_TOKEN_ISSUANCE_SCRIPT: String            = Files.readString(Paths.get("src/main/scala/contracts/game_token_issuance/game_token_issuance_v1.es")).stripMargin
+  final val GAME_LP_ISSUANCE_SCRIPT: String               = Files.readString(Paths.get("src/main/scala/contracts/game_lp_issuance/game_lp_issuance_v1.es")).stripMargin
+  final val GAME_LP_SCRIPT: String                        = Files.readString(Paths.get("src/main/scala/contracts/game_lp/game_lp_v1.es")).stripMargin
+  final val CARD_VALUE_MAPPING_ISSUANCE_SCRIPT: String    = Files.readString(Paths.get("src/main/scala/contracts/card_value_mapping_issuance/card_value_mapping_issuance_v1.es")).stripMargin
+  final val CARD_VALUE_MAPPING_SCRIPT: String             = Files.readString(Paths.get("src/main/scala/contracts/card_value_mapping/card_value_mapping_v1.es")).stripMargin
+  final val PLAYER_PROXY_SCRIPT: String                   = Files.readString(Paths.get("src/main/scala/contracts/player_proxy/player_proxy_v1.es")).stripMargin
 
   // Box Values: nanoERGs
   final val STORAGE_RENT_FEE_PERIOD_IN_YEARS: Long = 4L
@@ -97,6 +97,10 @@ object TradeInUtils {
   // Node Info
   final val DEFAULT_LOCAL_NODE_MAINNET_API_URL: String = "http://127.0.0.1:9053/"
   final val DEFAULT_LOCAL_NODE_TESTNET_API_URL: String = "http://127.0.0.1:9052/"
+
+  // TradeIn Fee Address
+  final val TRADE_IN_FEE_MAINNET_ADDRESS: String = "9ec5Z2jwMjm4Bma4TkERJJcF4WwG1UPdx3P4tLxk8AM4b16u1SM"
+  final val TRADE_IN_FEE_TESTNET_ADDRESS: String = ""
 
   /**
    * Get a time-zone timestamp.

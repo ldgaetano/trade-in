@@ -12,9 +12,8 @@ case class GameLPBoxBuilder(
                            gameLPBoxContract: ErgoContract,
                            gameLPSingletonToken: Eip4Token,
                            gameToken: Eip4Token,
-                           devAddress: ErgoValue[Coll[java.lang.Byte]],
+                           tradeInFee: ErgoValue[(java.lang.Long, java.lang.Long)],
                            devFee: ErgoValue[(java.lang.Long, java.lang.Long)],
-                           txOperatorFee: ErgoValue[(java.lang.Long, java.lang.Long)],
                            emissionInterval: ErgoValue[java.lang.Long],
                            emissionReductionFactorMultiplier: ErgoValue[java.lang.Long],
                            emissionReductionFactor: ErgoValue[java.lang.Long],
@@ -42,7 +41,7 @@ case class GameLPBoxBuilder(
         validTokens:_*
       )
       .registers(
-        ErgoValue.pairOf(devAddress, ErgoValue.of(gameToken.getId.getBytes)),
+        ErgoValue.pairOf(tradeInFee, devFee),
         emissionInterval,
         emissionReductionFactorMultiplier,
         emissionReductionFactor,
@@ -53,16 +52,17 @@ case class GameLPBoxBuilder(
 
   }
 
-  def setCardValueMappingTokens(cardValueMappingInputBox: InputBox, newCardValueMappingToken: Eip4Token): Unit = {
+  def setCardValueMappingTokens(cardValueMappingInputBoxes: Array[InputBox], newCardValueMappingToken: Eip4Token): Unit = {
 
-    val currentTokens: List[String] = cardValueMappingInputBox.getTokens.asScala.toList.map((t: ErgoToken) => t.getId.toString)
+    val currentTokens: Array[String] = cardValueMappingInputBoxes.map((input: InputBox) => input.getTokens.asScala.toList(0).getId.toString)
 
-    if (currentTokens.length > 2) {
+    if (currentTokens.length > 1) {
 
-     var prevCardValueMappingTokens: Array[Eip4Token] = Array()
-      currentTokens.foreach( (id: String) =>
-        prevCardValueMappingTokens = prevCardValueMappingTokens ++ Array(Eip4TokenBuilder.buildFromErgoBox(id, cardValueMappingInputBox))
-      )
+      var prevCardValueMappingTokens: Array[Eip4Token] = Array()
+
+      cardValueMappingInputBoxes.zipWithIndex.foreach{ case (input: InputBox, index: Int) =>
+        prevCardValueMappingTokens = prevCardValueMappingTokens ++ Array(Eip4TokenBuilder.buildFromErgoBox(currentTokens(index), input))
+      }
 
       this.cardValueMappingTokens = prevCardValueMappingTokens ++ Array(newCardValueMappingToken)
 
@@ -80,7 +80,13 @@ object GameLPBoxBuilder {
 
   def apply(input: InputBox)(implicit ctx: BlockchainContext): Option[GameLPBoxBuilder] = {
 
-    if ((input.getTokens.size == 2) & (input.getRegisters.size() == 6)) {
+    if ((input.getTokens.size >= 2) & (input.getRegisters.size() == 6)) {
+
+      val tradeInFee: (Long, Long) = input.getRegisters.get(0).asInstanceOf[ErgoValue[Coll[(Long, Long)]]].getValue()(0)
+      val tradeInFeeErgoValue = ErgoValue.pairOf(ErgoValue.of(tradeInFee._1), ErgoValue.of(tradeInFee._2))
+      
+      val devFee: (Long, Long) = input.getRegisters.get(0).asInstanceOf[ErgoValue[Coll[(Long, Long)]]].getValue()(1)
+      val devFeeErgoValue = ErgoValue.pairOf(ErgoValue.of(devFee._1), ErgoValue.of(devFee._2))
 
       Some(
         GameLPBoxBuilder(
@@ -88,7 +94,8 @@ object GameLPBoxBuilder {
           Address.fromErgoTree(input.getErgoTree, ctx.getNetworkType).toErgoContract,
           input.getTokens.get(0).asInstanceOf[Eip4Token],
           input.getTokens.get(1).asInstanceOf[Eip4Token],
-          input.getRegisters.get(0).asInstanceOf[ErgoValue[Coll[java.lang.Byte]]],
+          tradeInFeeErgoValue,
+          devFeeErgoValue,
           input.getRegisters.get(1).asInstanceOf[ErgoValue[java.lang.Long]],
           input.getRegisters.get(2).asInstanceOf[ErgoValue[java.lang.Long]],
           input.getRegisters.get(3).asInstanceOf[ErgoValue[java.lang.Long]],

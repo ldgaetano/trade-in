@@ -102,6 +102,9 @@ object TradeInUtils {
   final val TRADE_IN_FEE_MAINNET_ADDRESS: String = "9ec5Z2jwMjm4Bma4TkERJJcF4WwG1UPdx3P4tLxk8AM4b16u1SM"
   final val TRADE_IN_FEE_TESTNET_ADDRESS: String = ""
 
+  // TradeIn Fee
+  final val tradeInFeeBigInt: (BigInt, BigInt) = (10, 1000)
+
   /**
    * Get a time-zone timestamp.
    *

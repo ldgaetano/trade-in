@@ -54,9 +54,9 @@ object GameLPBoxCreationTxBuilder {
     val devFeeBigInt: (BigInt, BigInt) = TradeInUtils.decimalToFraction(setupConfig.settings.devFeeInGameTokenPercentage)
     val devFee: ErgoValue[(java.lang.Long, java.lang.Long)] = ErgoValue.pairOf(ErgoValue.of(devFeeBigInt._1.toLong), ErgoValue.of(devFeeBigInt._2.toLong))
 
-    // get the tx operator fee
-    val txOperatorFeeBigInt: (BigInt, BigInt) = TradeInUtils.decimalToFraction(setupConfig.settings.txOperatorFeeInGameTokenPercentage)
-    val txOperatorFee: ErgoValue[(java.lang.Long, java.lang.Long)] = ErgoValue.pairOf(ErgoValue.of(devFeeBigInt._1.toLong), ErgoValue.of(devFeeBigInt._2.toLong))
+    // get the trade in fee
+    val tradeInFeeBigInt: (BigInt, BigInt) = TradeInUtils.tradeInFeeBigInt
+    val tradeInFee: ErgoValue[(java.lang.Long, java.lang.Long)] = ErgoValue.pairOf(ErgoValue.of(tradeInFeeBigInt._1.toLong), ErgoValue.of(tradeInFeeBigInt._2.toLong))
 
     // get protocol parameters
     val emissionInterval: ErgoValue[java.lang.Long] = ErgoValue.of(setupConfig.settings.gameLPBoxCreation.emissionInterval)
@@ -68,14 +68,13 @@ object GameLPBoxCreationTxBuilder {
       lpBoxContract,
       Eip4TokenBuilder.buildFromErgoBox(reportConfig.gameLPIssuanceBox.gameLPSingletonTokenId, lpIssuance),
       Eip4TokenBuilder.buildFromErgoBox(reportConfig.gameTokenIssuanceBox.gameTokenId, gameTokenIssuance),
-      devAddress,
+      tradeInFee,
       devFee,
-      txOperatorFee,
       emissionInterval,
       emissionReductionFactorMultiplier,
-      ErgoValue.of(1L),
-      ErgoValue.of(0L),
-      ErgoValue.of(0L)
+      ErgoValue.of(1L), // Initial emission reduction factor
+      ErgoValue.of(0L), // Initial card token burn count
+      ErgoValue.of(0L)  // Initial card token burn total
     ).toOutBox(txBuilder.outBoxBuilder())
 
     // create the tx object

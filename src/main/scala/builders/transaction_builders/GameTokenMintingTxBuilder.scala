@@ -63,23 +63,17 @@ object GameTokenMintingTxBuilder {
     // create the game token issuance box contract
     val issuanceContract: ErgoContract = GameTokenIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
 
-    // game token picture content hash
-    val picFile: File = new File(TradeInUtils.TRADEIN_GAME_TOKEN_IMG_DIRECTORY_PATH + setupConfig.settings.gameTokenMinting.gameTokenPictureFileName)
-    val picBytes: Array[Byte] = Files.readAllBytes(picFile.toPath)
-    val picHash: hash.Digest32 = Sha256.hash(picBytes)
-
-    // create the game token
-    val gameToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
+    // create the game token (no image)
+    val gameToken: Eip4Token = new Eip4Token(
       inputs(0).getId.toString,
       setupConfig.settings.gameTokenMinting.gameTokenAmount,
       setupConfig.settings.gameTokenMinting.gameTokenName,
       setupConfig.settings.gameTokenMinting.gameTokenDescription,
       setupConfig.settings.gameTokenMinting.gameTokenDecimals,
-      picHash,
-      setupConfig.settings.gameTokenMinting.gameTokenPictureLink
+      null,
+      null,
+      null
     )
-
-
 
     // create the game token issuance box
     val issuance: OutBox = GameLPIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, gameToken).toOutBox(txBuilder.outBoxBuilder())

@@ -16,7 +16,7 @@ case class GameLPBoxCreationTxBuilder(
                                      networkType: NetworkType
                                      ) extends TradeInTxBuilder {
   override val txFee: Long = gameTokenIssuanceBox.getValue
-  override val changeAddress: Address = Address.fromErgoTree(gameLPBox.getErgoTree, networkType)
+  override val changeAddress: Address = Address.fromErgoTree(gameLPBox.getErgoTree, networkType) // There should be no change!
 
   override def build(implicit txBuilder: UnsignedTransactionBuilder): UnsignedTransaction = {
 
@@ -47,8 +47,9 @@ object GameLPBoxCreationTxBuilder {
     // build the lp box contract
     val lpBoxContract: ErgoContract = GameLPContractBuilder(setupConfig, reportConfig).toErgoContract
 
-    // get the dev address: where the game token dev fee will go, does not have to be a PK address, could also be a P2S address
-    val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes)
+    // write to the report
+    reportConfig.gameLPBox.gameLPContract = lpBoxContract.getErgoTree.bytesHex
+    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // get the dev fee
     val devFeeBigInt: (BigInt, BigInt) = TradeInUtils.decimalToFraction(setupConfig.settings.devFeeInGameTokenPercentage)

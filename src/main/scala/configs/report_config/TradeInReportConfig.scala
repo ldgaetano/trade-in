@@ -10,7 +10,7 @@ case class TradeInReportConfig(
                               var gameLPIssuanceBox: GameLPIssuanceBoxConfig,
                               var gameLPBox: GameLPBoxConfig,
                               var cardValueMappingIssuanceBox: CardValueMappingIssuanceBoxConfig,
-                              var cardValueMapping: Array[CardValueMappingBoxConfig],
+                              var cardValueMappingBoxes: Array[CardValueMappingBoxConfig],
                               var playerProxyBox: PlayerProxyBoxConfig
                               ) {
 

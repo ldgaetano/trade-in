@@ -28,7 +28,7 @@ case class GameLPContractBuilder(
             ConstantsBuilder.create()
               .item("$CardValueMappingContractBytes", cardValueMappingContractBytes.getValue)
               .item("$DevPKGE", devPKGE.getValue)
-              .item("$DevAddress", devAddress.getValue())
+              .item("$DevAddress", devAddress.getValue)
               .item("$TradeInFeeAddress", tradeInFeeAddress)
               .item("$SetCreationMultiSigThreshold", setCreationMultiSigThreshold)
               .item("$SetCreationMultiSigAddressesGE", setCreationMultiSigAddressesGE.getValue)
@@ -44,7 +44,7 @@ object GameLPContractBuilder {
 
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): GameLPContractBuilder = {
 
-        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBox.cardValueMappingContract).toPropositionBytes)
+        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes(0).cardValueMappingContract).toPropositionBytes)
 
         val devPKGE: ErgoValue[GroupElement] = ErgoValue.of(Address.createEip3Address(
             setupConfig.node.wallet.index,
@@ -52,15 +52,15 @@ object GameLPContractBuilder {
             SecretString.create(setupConfig.node.wallet.mnemonic),
             SecretString.create(setupConfig.node.wallet.password),
             false
-        ).getPublicKeyGE())
+        ).getPublicKeyGE)
 
-        val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes())
+        val devAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(setupConfig.settings.devAddress).toPropositionBytes)
         val networkType: NetworkType = setupConfig.node.networkType
         val tradeInFeeAddressByNetworkType: String = if (networkType == NetworkType.MAINNET) TradeInUtils.TRADE_IN_FEE_MAINNET_ADDRESS else TradeInUtils.TRADE_IN_FEE_TESTNET_ADDRESS
-        val tradeInFeeAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(tradeInFeeAddressByNetworkType).toPropositionBytes())
+        val tradeInFeeAddress: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(tradeInFeeAddressByNetworkType).toPropositionBytes)
         val multisigThreshold: Int = setupConfig.settings.setCreationMultiSig.threshold
         val multisigStrings: Array[String] = setupConfig.settings.setCreationMultiSig.addresses
-        val multisigGEs: Array[GroupElement] = multisigStrings.map(s => ErgoValue.of(Address.create(s).getPublicKeyGE()).getValue)
+        val multisigGEs: Array[GroupElement] = multisigStrings.map(s => ErgoValue.of(Address.create(s).getPublicKeyGE).getValue)
         val multisigAddresses: ErgoValue[Coll[GroupElement]] = ErgoValue.of(multisigGEs, ErgoType.groupElementType())
 
         new GameLPContractBuilder(

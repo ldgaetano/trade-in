@@ -58,7 +58,9 @@ object CardValueMappingTokenMintingTxBuilder {
     val inputs: Array[InputBox] = ctx.getDataSource.getUnspentBoxesFor(devPK, 0, 100).asScala.toArray
 
     // card value mapping issuance box value
-    val issuanceBoxValue: Long = setupConfig.settings.minerFeeInNanoERG
+    val minValue = setupConfig.settings.minerFeeInNanoERG
+    val amountOfCards = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
+    val issuanceBoxValue: Long = minValue * (1 + amountOfCards)
 
     // create the card value mapping issuance box contract
     val issuanceContract: ErgoContract = CardValueMappingContractBuilder(
@@ -86,15 +88,15 @@ object CardValueMappingTokenMintingTxBuilder {
       null
     )
 
-    // write to the report
-    reportConfig.cardValueMappingIssuanceBox.cardValueMappingTokenId = cardValueMappingToken.getId.toString
-    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
     // create the card value mapping issuance box
     val issuance: OutBox = CardValueMappingIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, cardValueMappingToken).toOutBox(txBuilder.outBoxBuilder())
 
     // miner fee
     val minerFee: Long = setupConfig.settings.minerFeeInNanoERG
+
+    // write to the report
+    reportConfig.cardValueMappingIssuanceBox.cardValueMappingTokenId = cardValueMappingToken.getId.toString
+    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // create the tx object
     new CardValueMappingTokenMintingTxBuilder(inputs, issuance, devPK, minerFee)

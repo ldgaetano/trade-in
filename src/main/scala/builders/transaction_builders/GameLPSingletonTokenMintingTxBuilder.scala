@@ -58,20 +58,28 @@ object GameLPSingletonTokenMintingTxBuilder {
     val inputs: Array[InputBox] = ctx.getDataSource.getUnspentBoxesFor(devPK, 0, 100).asScala.toArray
 
     // game token issuance box value
-    val issuanceBoxValue: Long = TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears)
+    val issuanceBoxValue: Long = setupConfig.settings.minerFeeInNanoERG
 
     // create the game token issuance box contract
     val issuanceContract: ErgoContract = GameLPIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
 
+    // game token properties
+    val id = inputs(0).getId.toString
+    val amount = 1L
+    val name = "Trade-In " + setupConfig.settings.gameTokenMinting.gameTokenName + " LP Singleton Token"
+    val description = "Trade-In protocol game liquidity pool singleton token for " + setupConfig.settings.gameTokenMinting.gameTokenName
+    val decimals = 0
+
     // create the game token
-    val lpToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
-      inputs(0).getId.toString,
-      1,
-      "Trade-In_" + setupConfig.settings.gameTokenMinting.gameTokenName + "_LP_Singleton_Token",
-      "Trade-In protocol game liquidity pool singleton token for " + setupConfig.settings.gameTokenMinting.gameTokenName,
-      0,
-      Array(),
-      ""
+    val lpToken: Eip4Token = new Eip4Token(
+      id,
+      amount,
+      name,
+      description,
+      decimals,
+      null,
+      null,
+      null
     )
 
     // write to the report

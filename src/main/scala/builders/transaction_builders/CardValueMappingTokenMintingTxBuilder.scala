@@ -6,6 +6,7 @@ import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.appkit._
+import special.sigma.GroupElement
 import utils.TradeInUtils
 
 import scala.collection.JavaConverters._
@@ -42,7 +43,7 @@ object CardValueMappingTokenMintingTxBuilder {
     val txBuilder: UnsignedTransactionBuilder = ctx.newTxBuilder()
 
     // dev pk
-    val devPK: Address = Address.createEip3Address(
+    val devPK = Address.createEip3Address(
       setupConfig.node.wallet.index,
       setupConfig.node.networkType,
       SecretString.create(setupConfig.node.wallet.mnemonic),
@@ -50,37 +51,52 @@ object CardValueMappingTokenMintingTxBuilder {
       false
     )
 
+    // dev pk ge
+    val devPKGE: ErgoValue[GroupElement] = ErgoValue.of(devPK.getPublicKeyGE)
+
     // get the requisite input boxes required
     val inputs: Array[InputBox] = ctx.getDataSource.getUnspentBoxesFor(devPK, 0, 100).asScala.toArray
 
     // card value mapping issuance box value
-    val issuanceBoxValue: Long = TradeInUtils.calcSafeStorageRentValue(setupConfig.settings.protocolPeriodInYears) + setupConfig.settings.minerFeeInNanoERG
+    val minValue = setupConfig.settings.minerFeeInNanoERG
+    val amountOfCards = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
+    val issuanceBoxValue: Long = minValue * (1 + amountOfCards)
 
     // create the card value mapping issuance box contract
-    val issuanceContract: ErgoContract = CardValueMappingContractBuilder().toErgoContract
+    val issuanceContract: ErgoContract = CardValueMappingContractBuilder(
+      devPKGE
+    ).toErgoContract
 
     // create the token
     val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
     val cardSetId: String = setupConfig.settings.cardValueMappingBoxCreation.cardSetCollectionTokenId
-    val cardValueMappingToken: Eip4Token = Eip4TokenBuilder.buildNftPictureToken(
-      inputs(0).getId.toString,
-      cardSetSize,
-      "Trade-In_" + setupConfig.settings.gameTokenMinting.gameTokenName + "_Card-Value-Mapping_Token",
-      "Trade-In protocol card-value-mapping tokens for card set: " + cardSetId + "of game: " + setupConfig.settings.gameTokenMinting.gameTokenName,
-      0,
-      Array(),
-      ""
-    )
 
-    // write to the report
-    reportConfig.cardValueMappingIssuanceBox.cardValueMappingSingletonTokenId = cardValueMappingToken.getId.toString
-    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+    val id = inputs(0).getId.toString
+    val size = cardSetSize
+    val name = "Trade-In " + setupConfig.settings.gameTokenMinting.gameTokenName + " Card-Value-Mapping Token"
+    val description = "Trade-In protocol card-value-mapping tokens for card set: " + cardSetId + "of game: " + setupConfig.settings.gameTokenMinting.gameTokenName
+    val decimals = 0
+
+    val cardValueMappingToken: Eip4Token = new Eip4Token(
+      id,
+      size,
+      name,
+      description,
+      decimals,
+      null,
+      null,
+      null
+    )
 
     // create the card value mapping issuance box
     val issuance: OutBox = CardValueMappingIssuanceBoxBuilder(issuanceBoxValue, issuanceContract, cardValueMappingToken).toOutBox(txBuilder.outBoxBuilder())
 
     // miner fee
     val minerFee: Long = setupConfig.settings.minerFeeInNanoERG
+
+    // write to the report
+    reportConfig.cardValueMappingIssuanceBox.cardValueMappingTokenId = cardValueMappingToken.getId.toString
+    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     // create the tx object
     new CardValueMappingTokenMintingTxBuilder(inputs, issuance, devPK, minerFee)

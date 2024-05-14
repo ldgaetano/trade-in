@@ -19,7 +19,7 @@ case class CardValueMappingContractBuilder(
 
         ctx.compileContract(
             ConstantsBuilder.create()
-                .item("$DevPKGE", devPKGE.getValue())
+                .item("$DevPKGE", devPKGE.getValue)
                 .build(),
             script
         )

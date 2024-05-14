@@ -53,7 +53,7 @@ object CardValueMappingBoxCreationTxBuilder {
     val cardValueMappingIssuanceBox: InputBox = ctx.getDataSource.getBoxById(reportConfig.cardValueMappingIssuanceBox.boxId, true, true)
 
     // build the card value mapping box contract
-    val mappingBoxContract: ErgoContract = CardValueMappingContractBuilder(setupConfig, reportConfig).toErgoContract
+    val mappingBoxContract: ErgoContract = CardValueMappingContractBuilder(setupConfig).toErgoContract
 
     // build the card value mapping boxes
     val minValue = setupConfig.settings.minerFeeInNanoERG
@@ -73,11 +73,13 @@ object CardValueMappingBoxCreationTxBuilder {
 
       cardValueMappingBoxes = cardValueMappingBoxes ++ Array(cardValueMappingBox)
 
-      // write to the report
+      // update the report object
       reportConfig.cardValueMappingBoxes(i).cardValueMappingContract = mappingBoxContract.getErgoTree.bytesHex
-      TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }
+    // write to the report
+    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
 
     // get the game lp box output
     val gameLPBoxOut = GameLPBoxBuilder(gameLPBox).get.toOutBox(txBuilder.outBoxBuilder())

@@ -7,6 +7,9 @@ import special.collection.Coll
 import special.sigma.SigmaProp
 import utils.TradeInUtils
 import special.sigma.GroupElement
+import utils.TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH
+
+import scala.util.Try
 
 case class GameLPIssuanceContractBuilder(
                                           gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]],
@@ -41,12 +44,29 @@ object GameLPIssuanceContractBuilder {
             SecretString.create(setupConfig.node.wallet.mnemonic),
             SecretString.create(setupConfig.node.wallet.password),
             false
-        ).getPublicKeyGE())
+        ).getPublicKeyGE)
 
         new GameLPIssuanceContractBuilder(
             lpContractBytes,
             devPKGE
         )
+
+    }
+
+    def compile(setupConfig: TradeInSetupConfig)(implicit ctx: BlockchainContext): Try[Unit] = {
+
+        println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ISSUANCE ==========" + Console.RESET)
+
+        // read the report
+        val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+        val reportConfig = readReportConfigResult.get
+
+        val contract: ErgoContract = GameLPIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
+        val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
+
+        // write to the report
+        reportConfig.gameLPIssuanceBox.gameLPIssuanceContract = contractString
+        TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }
 

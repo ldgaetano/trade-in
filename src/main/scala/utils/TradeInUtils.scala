@@ -281,7 +281,7 @@ object TradeInUtils {
     }
 
     // compile game lp contract
-    val lpResult = compileGameLP
+    val lpResult = GameLPContractBuilder.compile(setupConfig)
     if (lpResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP CONTRACT ==========" + Console.RESET)
     } else {
@@ -345,22 +345,7 @@ object TradeInUtils {
 
   }
 
-  def compileGameLP(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
 
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = GameLPContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.gameLPBox.gameLPContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
 
 
 

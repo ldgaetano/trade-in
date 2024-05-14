@@ -299,7 +299,7 @@ object TradeInUtils {
     }
 
     // compile game token issuance contract
-    val gameTokenIssuanceResult = compileGameTokenIssuance
+    val gameTokenIssuanceResult = GameTokenIssuanceContractBuilder.compile(setupConfig)
     if (gameTokenIssuanceResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE ==========" + Console.RESET)
     } else {
@@ -308,23 +308,6 @@ object TradeInUtils {
     }
 
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED CONTRACTS SUCCESSFULLY ==========" + Console.RESET)
-
-  }
-
-  def compileGameTokenIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME TOKEN ISSUANCE ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = GameTokenIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.gameTokenIssuanceBox.gameTokenIssuanceContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
   }
 

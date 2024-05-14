@@ -257,7 +257,7 @@ object TradeInUtils {
     println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING CONTRACTS ==========" + Console.RESET)
 
     // compile player proxy contract
-    val proxyResult = compilePlayerProxy
+    val proxyResult = PlayerProxyContractBuilder.compile(setupConfig)
     if (proxyResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: PLAYER PROXY CONTRACT ==========" + Console.RESET)
     } else {
@@ -392,23 +392,6 @@ object TradeInUtils {
 
     // write to the report
     reportConfig.cardValueMappingBox.cardValueMappingContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compilePlayerProxy(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: PLAYER PROXY ==========" + Console.RESET)
-
-    val contract: ErgoContract = PlayerProxyContractBuilder(setupConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    // write to the report
-    reportConfig.playerProxyBox.playerProxyContract = contractString
     TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
   }

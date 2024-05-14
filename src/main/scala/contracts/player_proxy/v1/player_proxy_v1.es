@@ -16,6 +16,7 @@
     // R5: Coll[Byte]       GameLPSingletonTokenId
     // R6: Coll[Byte]       GameTokenId
     // R7: Long             MinerFee
+    // R8: Long             TxOperatorFee
 
     // ===== Relevant Transactions ===== //
     // 1. Trade-In Tx
@@ -25,7 +26,7 @@
     // Context Variables: CardTokenIssuerBox, CardSetCollectionIssuerBox
     
     // ===== Compile Time Constants ($) ===== //
-    // None
+    // $MinTxOperatorFee: Long
 
     // ===== Context Variables (_) ===== //
     // None
@@ -37,6 +38,7 @@
     val gameLPSingletonTokenId: Coll[Byte]          = SELF.R5[Coll[Byte]].get
     val gameTokenId: Coll[Byte]                     = SELF.R6[Coll[Byte]].get
     val minerFee: Long                              = SELF.R7[Long].get
+    val txOperatorFee: Long                         = SELF.R8[Long].get
     val minerFeeErgoTreeBytesHash: Coll[Byte]       = fromBase16("e540cceffd3b8dd0f401193576cc413467039695969427df94454193dddfb375")
     val isFees: Boolean = !(OUTPUTS.size == 3)
 
@@ -50,6 +52,7 @@
         val gameLPBoxOUT: Box       = OUTPUTS(0)
         val playerPKBoxOUT: Box     = if (isFees) OUTPUTS(3) else OUTPUTS(1)
         val minerFeeBoxOUT: Box     = if (isFees) OUTPUTS(4) else OUTPUTS(2)
+        val txOperatorFeeBoxOUT: Box = if (isFees) OUTPUTS(5) else OUTPUTS(3)
 
         val validGameLPBoxIN: Boolean = {
 
@@ -65,7 +68,7 @@
 
         val validPlayerPKBoxOUT: Boolean = {
 
-            val validValue: Boolean = (playerPKBoxOUT.value == SELF.value - minerFee)
+            val validValue: Boolean = (playerPKBoxOUT.value == SELF.value - minerFee - txOperatorFee)
             val validContract: Boolean = (playerPKBoxOUT.propositionBytes == playerPK.propBytes)
 
             val validGameTokenTransfer: Boolean = {
@@ -96,6 +99,15 @@
 
         }
 
+        val validTxOperatorFee: Boolean = {
+
+            allOf(Coll(
+                (txOperatorFee >= $MinTxOperatorFee),
+                (txOperatorFeeBoxOUT.value == txOperatorFee)
+            ))
+
+        }
+
         allOf(Coll(
             validGameLPBoxIN,
             validPlayerPKBoxOUT,
@@ -104,6 +116,6 @@
 
     }
 
-    sigmaProp(validTradeInTx)
+    sigmaProp(validTradeInTx) 
 
 }

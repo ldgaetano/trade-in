@@ -265,7 +265,7 @@ object TradeInUtils {
     }
 
     // compile card value mapping contract
-    val cardValueMappingResult = compileCardValueMapping
+    val cardValueMappingResult = CardValueMappingContractBuilder.compile(setupConfig)
     if (cardValueMappingResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
     } else {
@@ -379,21 +379,5 @@ object TradeInUtils {
 
   }
 
-  def compileCardValueMapping(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = CardValueMappingContractBuilder().toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.cardValueMappingBox.cardValueMappingContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
 
 }

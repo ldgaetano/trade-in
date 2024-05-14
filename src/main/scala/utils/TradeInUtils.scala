@@ -1,8 +1,9 @@
 package utils
 
 import builders.contract_builders.{CardValueMappingContractBuilder, CardValueMappingIssuanceContractBuilder, GameLPContractBuilder, GameLPIssuanceContractBuilder, GameTokenIssuanceContractBuilder, PlayerProxyContractBuilder}
-import builders.transaction_builders.{CardValueMappingTokenMintingTxBuilder, GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
-import configs.report_config.TradeInReportConfig
+import builders.transaction_builders.{CardValueMappingBoxCreationTxBuilder, CardValueMappingTokenMintingTxBuilder, GameLPBoxCreationTxBuilder, GameLPSingletonTokenMintingTxBuilder, GameTokenMintingTxBuilder}
+import configs.mapping_config.TradeInMappingConfig
+import configs.report_config.{CardValueMappingBoxConfig, TradeInReportConfig}
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoContract, ErgoProver, NetworkType, OutBox, SignedTransaction, UnsignedTransaction}
 
@@ -31,7 +32,7 @@ object TradeInUtils {
   // File Paths
   final val TRADEIN_SETUP_CONFIG_FILE_PATH: String = "settings/tradein_setup_config.json"
   final val TRADEIN_REPORT_CONFIG_FILE_PATH: String = "settings/tradein_report_config.json"
-  final val TRADEIN_GAME_TOKEN_IMG_DIRECTORY_PATH: String = "img/"
+  final val TRADEIN_MAPPING_CONFIG_FILE_PATH: String = "settings/tradein_mapping_config.json"
 
   // ErgoScript contracts
   final val GAME_TOKEN_ISSUANCE_SCRIPT: String            = Files.readString(Paths.get("src/main/scala/contracts/game_token_issuance/game_token_issuance_v1.es")).stripMargin
@@ -131,6 +132,43 @@ object TradeInUtils {
    * @return The boolean value if the api url matched the local node url
    */
   def isLocalNodeApiUrl(apiUrl: String): Boolean = apiUrl.equals(DEFAULT_LOCAL_NODE_MAINNET_API_URL) || apiUrl.equals(DEFAULT_LOCAL_NODE_TESTNET_API_URL)
+
+  def executeCardValueMappingCreation(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
+
+    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} EXECUTING TX: CARD-VALUE-MAPPING CREATION ==========" + Console.RESET)
+
+    // read the report
+    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+    val reportConfig: TradeInReportConfig = readReportConfigResult.get
+
+    // read the map config
+    val readMapConfigResult: Try[TradeInMappingConfig] = TradeInMappingConfig.load(TRADEIN_MAPPING_CONFIG_FILE_PATH)
+    val mapConfig: TradeInMappingConfig = readMapConfigResult.get
+
+    // Build the transaction
+    val unsignedTx: UnsignedTransaction = CardValueMappingBoxCreationTxBuilder(setupConfig, reportConfig, mapConfig).build(ctx.newTxBuilder())
+    val signedTx: SignedTransaction = prover.sign(unsignedTx)
+    val txId: String = ctx.sendTransaction(signedTx).replaceAll("\"", "")
+
+    // Print out tx status message
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SUCCESSFUL: CARD-VALUE-MAPPING CREATION ==========" + Console.RESET)
+    println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} TX SAVED: CARD-VALUE-MAPPING CREATION ==========" + Console.RESET)
+
+    for (i <- 1 to reportConfig.cardValueMappingBoxes.length) {
+      reportConfig.cardValueMappingBoxes(i).boxId = signedTx.getOutputsToSpend.get(i).getId.toString
+      reportConfig.cardValueMappingBoxes(i).txId = txId
+    }
+    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
+
+    // Print tx link to user
+    println(Console.BLUE + s"========== ${TradeInUtils.getTimeStamp("UTC")} VIEW TX IN THE ERGO-EXPLORER WITH THE LINK BELOW ==========" + Console.RESET)
+    if (ctx.getNetworkType.equals(NetworkType.MAINNET)) {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_MAINNET + txId)
+    } else {
+      println(TradeInUtils.ERGO_EXPLORER_TX_URL_PREFIX_TESTNET + txId)
+    }
+
+  }
 
   def executeCardValueMappingSingletonTokenMinting(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext, prover: ErgoProver): Unit = {
 

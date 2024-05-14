@@ -69,7 +69,7 @@ object TradeIn {
 
         } else if (txType.equals("--card-value-mapping-creation")) {
 
-          System.out.println("not implemented yet!")
+          TradeInUtils.executeCardValueMappingCreation(setupConfig, ctx, prover)
 
         } else {
 

@@ -257,7 +257,7 @@ object TradeInUtils {
     println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING CONTRACTS ==========" + Console.RESET)
 
     // compile player proxy contract
-    val proxyResult = compilePlayerProxy
+    val proxyResult = PlayerProxyContractBuilder.compile(setupConfig)
     if (proxyResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: PLAYER PROXY CONTRACT ==========" + Console.RESET)
     } else {
@@ -265,7 +265,7 @@ object TradeInUtils {
     }
 
     // compile card value mapping contract
-    val cardValueMappingResult = compileCardValueMapping
+    val cardValueMappingResult = CardValueMappingContractBuilder.compile(setupConfig)
     if (cardValueMappingResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
     } else {
@@ -273,7 +273,7 @@ object TradeInUtils {
     }
 
     // compile card value mapping issuance contract
-    val cardValueMappingIssuanceResult = compileCardValueMappingIssuance
+    val cardValueMappingIssuanceResult = CardValueMappingIssuanceContractBuilder.compile(setupConfig)
     if (cardValueMappingIssuanceResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: CARD VALUE MAPPING ISSUANCE CONTRACT ==========" + Console.RESET)
     } else {
@@ -281,7 +281,7 @@ object TradeInUtils {
     }
 
     // compile game lp contract
-    val lpResult = compileGameLP
+    val lpResult = GameLPContractBuilder.compile(setupConfig)
     if (lpResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP CONTRACT ==========" + Console.RESET)
     } else {
@@ -290,7 +290,7 @@ object TradeInUtils {
     }
 
     // compile game lp issuance contract
-    val lpIssuanceResult = compileGameLPIssuance
+    val lpIssuanceResult = GameLPIssuanceContractBuilder.compile(setupConfig)
     if (lpIssuanceResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
     } else {
@@ -299,7 +299,7 @@ object TradeInUtils {
     }
 
     // compile game token issuance contract
-    val gameTokenIssuanceResult = compileGameTokenIssuance
+    val gameTokenIssuanceResult = GameTokenIssuanceContractBuilder.compile(setupConfig)
     if (gameTokenIssuanceResult.isSuccess) {
       println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE ==========" + Console.RESET)
     } else {
@@ -308,108 +308,6 @@ object TradeInUtils {
     }
 
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED CONTRACTS SUCCESSFULLY ==========" + Console.RESET)
-
-  }
-
-  def compileGameTokenIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME TOKEN ISSUANCE ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = GameTokenIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.gameTokenIssuanceBox.gameTokenIssuanceContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compileGameLPIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ISSUANCE ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = GameLPIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.gameLPIssuanceBox.gameLPIssuanceContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compileGameLP(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = GameLPContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.gameLPBox.gameLPContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compileCardValueMappingIssuance(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ISSUANCE ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = CardValueMappingIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.cardValueMappingIssuanceBox.cardValueMappingIssuanceContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compileCardValueMapping(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ==========" + Console.RESET)
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    val contract: ErgoContract = CardValueMappingContractBuilder().toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // write to the report
-    reportConfig.cardValueMappingBox.cardValueMappingContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
-  }
-
-  def compilePlayerProxy(implicit setupConfig: TradeInSetupConfig, ctx: BlockchainContext): Try[Unit] = {
-
-    println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: PLAYER PROXY ==========" + Console.RESET)
-
-    val contract: ErgoContract = PlayerProxyContractBuilder(setupConfig).toErgoContract
-    val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
-
-    // read the report
-    val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
-    val reportConfig = readReportConfigResult.get
-
-    // write to the report
-    reportConfig.playerProxyBox.playerProxyContract = contractString
-    TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
   }
 

@@ -3,13 +3,15 @@ package builders.contract_builders
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import utils.TradeInUtils
-
 import org.ergoplatform.appkit._
 import sigmastate.Values
 import special.collection.Coll
 import special.sigma.SigmaProp
 import sigmastate.Values.SigmaPropValue
 import special.sigma.GroupElement
+import utils.TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH
+
+import scala.util.Try
 
 case class GameLPContractBuilder(
                                   cardValueMappingContractBytes: ErgoValue[Coll[java.lang.Byte]],
@@ -71,6 +73,23 @@ object GameLPContractBuilder {
             multisigThreshold,
             multisigAddresses
         )
+
+    }
+
+    def compile(setupConfig: TradeInSetupConfig)(implicit ctx: BlockchainContext): Try[Unit] = {
+
+        println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: GAME LP ==========" + Console.RESET)
+
+        // read the report
+        val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+        val reportConfig = readReportConfigResult.get
+
+        val contract: ErgoContract = GameLPContractBuilder(setupConfig, reportConfig).toErgoContract
+        val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
+
+        // write to the report
+        reportConfig.gameLPBox.gameLPContract = contractString
+        TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }
 

@@ -16,9 +16,7 @@
       "gameTokenName": "",
       "gameTokenDescription": "",
       "gameTokenAmount": 42,
-      "gameTokenDecimals": 0,
-      "gameTokenPictureFileName": "",
-      "gameTokenPictureLink": ""
+      "gameTokenDecimals": 0
     },
     "gameLPBoxCreation": {
       "emissionInterval": 100,

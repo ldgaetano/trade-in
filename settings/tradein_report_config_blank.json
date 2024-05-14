@@ -20,9 +20,7 @@
       "cardValueMappingIssuanceContract": "",
       "cardValueMappingTokenId": "",
       "boxId": "",
-      "txId": "",
-      "cardSetCollectionTokenId": "",
-      "cardSetSize": 0
+      "txId": ""
     }
   ],
   "cardValueMappingBoxes": [

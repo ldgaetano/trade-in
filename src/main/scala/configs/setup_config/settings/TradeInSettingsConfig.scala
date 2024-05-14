@@ -7,7 +7,7 @@ case class TradeInSettingsConfig(
                                setCreationMultiSig: TradeInSetCreationMutliSigConfig,
                                devAddress: String,
                                devFeeInGameTokenPercentage: Double,
-                               txOperatorFeeInNanoErg: Long,
+                               minTxOperatorFeeInNanoErg: Long,
                                minerFeeInNanoERG: Long
                              )
 {}

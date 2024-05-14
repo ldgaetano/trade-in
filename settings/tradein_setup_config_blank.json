@@ -34,7 +34,7 @@
     },
     "devAddress": "",
     "devFeeInGameTokenPercentage": 0.05,
-    "txOperatorFeeInNanoErg": 0.01,
+    "minTxOperatorFeeInNanoErg": 0.01,
     "minerFeeInNanoERG": 1100000
   }
 }

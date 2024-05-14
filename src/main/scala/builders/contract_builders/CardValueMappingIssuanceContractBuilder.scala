@@ -7,6 +7,9 @@ import special.collection.Coll
 import special.sigma.SigmaProp
 import utils.TradeInUtils
 import special.sigma.GroupElement
+import utils.TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH
+
+import scala.util.Try
 
 case class CardValueMappingIssuanceContractBuilder(
                                                     gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]],
@@ -54,7 +57,7 @@ object CardValueMappingIssuanceContractBuilder {
             SecretString.create(setupConfig.node.wallet.mnemonic),
             SecretString.create(setupConfig.node.wallet.password),
             false
-        ).getPublicKeyGE())
+        ).getPublicKeyGE)
 
         new CardValueMappingIssuanceContractBuilder(
             gameLPContractBytes,
@@ -64,6 +67,23 @@ object CardValueMappingIssuanceContractBuilder {
             minerFee,
             devPKGE
         )
+
+    }
+
+    def compile(setupConfig: TradeInSetupConfig)(implicit ctx: BlockchainContext): Try[Unit] = {
+
+        println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING: CARD VALUE MAPPING ISSUANCE ==========" + Console.RESET)
+
+        // read the report
+        val readReportConfigResult: Try[TradeInReportConfig] = TradeInReportConfig.load(TRADEIN_REPORT_CONFIG_FILE_PATH)
+        val reportConfig = readReportConfigResult.get
+
+        val contract: ErgoContract = CardValueMappingIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
+        val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
+
+        // write to the report
+        reportConfig.cardValueMappingIssuanceBox.cardValueMappingIssuanceContract = contractString
+        TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }
 

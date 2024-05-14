@@ -33,7 +33,7 @@
 
     // ===== Relevant Variables ===== //
     val cardTokenId: Coll[Byte]                     = SELF.tokens(0)._1
-    val playerPKGE: GroupElement                    = SELF.R4[GroupElement]get
+    val playerPKGE: GroupElement                    = SELF.R4[GroupElement].get
     val playerPK: SigmaProp                         = proveDlog(playerPKGE)
     val gameLPSingletonTokenId: Coll[Byte]          = SELF.R5[Coll[Byte]].get
     val gameTokenId: Coll[Byte]                     = SELF.R6[Coll[Byte]].get
@@ -85,7 +85,7 @@
             allOf(Coll(
                 validValue,
                 validContract,
-                validGameTokens
+                validGameTokenTransfer
             ))
 
         }
@@ -111,7 +111,8 @@
         allOf(Coll(
             validGameLPBoxIN,
             validPlayerPKBoxOUT,
-            validMiner
+            validMinerFee,
+            validTxOperatorFee
         ))
 
     }

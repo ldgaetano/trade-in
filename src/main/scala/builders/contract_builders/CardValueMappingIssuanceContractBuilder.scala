@@ -3,6 +3,7 @@ package builders.contract_builders
 import configs.report_config.TradeInReportConfig
 import configs.setup_config.TradeInSetupConfig
 import org.ergoplatform.appkit._
+import sigmastate.serialization.ErgoTreeSerializer
 import special.collection.Coll
 import special.sigma.SigmaProp
 import utils.TradeInUtils
@@ -44,7 +45,7 @@ object CardValueMappingIssuanceContractBuilder {
 
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): CardValueMappingIssuanceContractBuilder = {
 
-        val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
+        val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.fromErgoTree(ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(reportConfig.gameLPBox.gameLPContract.getBytes), setupConfig.node.networkType).toPropositionBytes)
         val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes(0).cardValueMappingContract).toPropositionBytes)
 
         val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize

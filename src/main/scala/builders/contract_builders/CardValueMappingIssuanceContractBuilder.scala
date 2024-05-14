@@ -45,7 +45,7 @@ object CardValueMappingIssuanceContractBuilder {
 
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): CardValueMappingIssuanceContractBuilder = {
 
-        val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.fromErgoTree(ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(reportConfig.gameLPBox.gameLPContract.getBytes), setupConfig.node.networkType).toPropositionBytes)
+        val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
         val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes(0).cardValueMappingContract).toPropositionBytes)
 
         val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
@@ -80,10 +80,10 @@ object CardValueMappingIssuanceContractBuilder {
         val reportConfig = readReportConfigResult.get
 
         val contract: ErgoContract = CardValueMappingIssuanceContractBuilder(setupConfig, reportConfig).toErgoContract
-        val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
+        val address: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
 
         // write to the report
-        reportConfig.cardValueMappingIssuanceBox.cardValueMappingIssuanceContract = contractString
+        reportConfig.cardValueMappingIssuanceBox.cardValueMappingIssuanceContract = address
         TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }

@@ -46,7 +46,7 @@ object CardValueMappingBoxCreationTxBuilder {
     val txBuilder: UnsignedTransactionBuilder = ctx.newTxBuilder()
 
     // get the game lp box
-    val gameLPBoxes = ctx.getDataSource.getUnspentBoxesFor(Address.fromErgoTree(ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(reportConfig.gameLPBox.gameLPContract.getBytes), setupConfig.node.networkType), 0, 1)
+    val gameLPBoxes = ctx.getDataSource.getUnspentBoxesFor(Address.create(reportConfig.gameLPBox.gameLPContract), 0, 1)
     val gameLPBox: InputBox = gameLPBoxes.get(0)
 
     // get the game token issuance box

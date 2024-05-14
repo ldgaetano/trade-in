@@ -27,11 +27,11 @@ case class CardValueMappingIssuanceContractBuilder(
         ctx.compileContract(
             ConstantsBuilder.create()
               .item("$GameLPContractBytes", gameLPContractBytes)
-              .item("$CardValueMappingContractBytes", cardValueMappingContractBytes.getValue())
+              .item("$CardValueMappingContractBytes", cardValueMappingContractBytes.getValue)
               .item("$CardSetSize", cardSetSize)
               .item("$MinBoxValue", minBoxValue)
               .item("$MinerFee", minerFee)
-              .item("$DevPKGE", devPKGE.getValue())
+              .item("$DevPKGE", devPKGE.getValue)
               .build(),
             script
         )
@@ -45,7 +45,7 @@ object CardValueMappingIssuanceContractBuilder {
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): CardValueMappingIssuanceContractBuilder = {
 
         val gameLPContractBytes: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.gameLPBox.gameLPContract).toPropositionBytes)
-        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBox.cardValueMappingContract).toPropositionBytes)
+        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes(0).cardValueMappingContract).toPropositionBytes)
 
         val cardSetSize: Long = setupConfig.settings.cardValueMappingBoxCreation.cardSetSize
 

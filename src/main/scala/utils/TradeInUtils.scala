@@ -294,20 +294,28 @@ object TradeInUtils {
 
     println(Console.YELLOW + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILING CONTRACTS ==========" + Console.RESET)
 
-    // compile player proxy contract
-    val proxyResult = PlayerProxyContractBuilder.compile(setupConfig)
-    if (proxyResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: PLAYER PROXY CONTRACT ==========" + Console.RESET)
+    // compile game token issuance contract
+    val gameTokenIssuanceResult = GameTokenIssuanceContractBuilder.compile(setupConfig)
+    if (gameTokenIssuanceResult.isSuccess) {
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE ==========" + Console.RESET)
     } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: PLAYER PROXY CONTRACT ==========" + Console.RESET)
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME TOKEN ISSUANCE ==========" + Console.RESET)
     }
 
-    // compile card value mapping contract
-    val cardValueMappingResult = CardValueMappingContractBuilder.compile(setupConfig)
-    if (cardValueMappingResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
+    // compile game lp issuance contract
+    val lpIssuanceResult = GameLPIssuanceContractBuilder.compile(setupConfig)
+    if (lpIssuanceResult.isSuccess) {
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
     } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
+    }
+
+    // compile game lp contract
+    val lpResult = GameLPContractBuilder.compile(setupConfig)
+    if (lpResult.isSuccess) {
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP CONTRACT ==========" + Console.RESET)
+    } else {
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME LP CONTRACT ==========" + Console.RESET)
     }
 
     // compile card value mapping issuance contract
@@ -318,31 +326,20 @@ object TradeInUtils {
       println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: CARD VALUE MAPPING ISSUANCE CONTRACT ==========" + Console.RESET)
     }
 
-    // compile game lp contract
-    val lpResult = GameLPContractBuilder.compile(setupConfig)
-    if (lpResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP CONTRACT ==========" + Console.RESET)
+    // compile card value mapping contract
+    val cardValueMappingResult = CardValueMappingContractBuilder.compile(setupConfig)
+    if (cardValueMappingResult.isSuccess) {
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
     } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME LP CONTRACT ==========" + Console.RESET)
-      println(lpResult.get)
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: CARD VALUE MAPPING CONTRACT ==========" + Console.RESET)
     }
 
-    // compile game lp issuance contract
-    val lpIssuanceResult = GameLPIssuanceContractBuilder.compile(setupConfig)
-    if (lpIssuanceResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
+    // compile player proxy contract
+    val proxyResult = PlayerProxyContractBuilder.compile(setupConfig)
+    if (proxyResult.isSuccess) {
+      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: PLAYER PROXY CONTRACT ==========" + Console.RESET)
     } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME LP ISSUANCE CONTRACT ==========" + Console.RESET)
-      println(lpResult.get)
-    }
-
-    // compile game token issuance contract
-    val gameTokenIssuanceResult = GameTokenIssuanceContractBuilder.compile(setupConfig)
-    if (gameTokenIssuanceResult.isSuccess) {
-      println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED SUCCESSFULLY: GAME TOKEN ISSUANCE ==========" + Console.RESET)
-    } else {
-      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: GAME TOKEN ISSUANCE ==========" + Console.RESET)
-      println(lpResult.get)
+      println(Console.RED + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILATION FAILED FOR: PLAYER PROXY CONTRACT ==========" + Console.RESET)
     }
 
     println(Console.GREEN + s"========== ${TradeInUtils.getTimeStamp("UTC")} COMPILED CONTRACTS SUCCESSFULLY ==========" + Console.RESET)

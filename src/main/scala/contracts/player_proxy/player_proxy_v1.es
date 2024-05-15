@@ -12,7 +12,7 @@
     // Tokens: Coll[(Coll[Byte], Long)]
     // 1. (CardTokenId, 1)
     // Registers:
-    // R4: GroupElement     PlayerPK
+    // R4: GroupElement     PlayerPKGE
     // R5: Coll[Byte]       GameLPSingletonTokenId
     // R6: Coll[Byte]       GameTokenId
     // R7: Long             MinerFee
@@ -117,6 +117,6 @@
 
     }
 
-    sigmaProp(validTradeInTx) 
+    sigmaProp(validTradeInTx) || playerPK
 
 }

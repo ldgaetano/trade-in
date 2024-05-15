@@ -77,7 +77,7 @@
 
         allOf(Coll(
             validGameLPBoxIN,
-            validCardValueMappingBoxOUT,
+            validCardValueMappingBoxesOUT,
             validMinerFee,
             validOutputSize
         ))

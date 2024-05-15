@@ -58,7 +58,7 @@ object CardValueMappingContractBuilder {
         val contractString: String = Address.fromErgoTree(contract.getErgoTree, ctx.getNetworkType).toString
 
         // write to the report
-        reportConfig.cardValueMappingBoxes.foreach(mapping => mapping.cardValueMappingContract = contractString)
+        reportConfig.cardValueMappingBoxes.cardValueMappingContract = contractString
         TradeInReportConfig.write(TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
 
     }

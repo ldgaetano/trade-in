@@ -41,6 +41,7 @@
         
         // Outputs    
         val gameLPBoxOUT: Box = OUTPUTS(0)
+        val minerFeeBoxOUT: Box = OUTPUTS(1)
 
         val validGameLPIssuanceBoxIN: Boolean = {
 

@@ -15,21 +15,16 @@
     "gameLPContract": "",
     "txId": ""
   },
-  "cardValueMappingIssuanceBoxes": [
-    {
-      "cardValueMappingIssuanceContract": "",
-      "cardValueMappingTokenId": "",
-      "boxId": "",
-      "txId": ""
-    }
-  ],
-  "cardValueMappingBoxes": [
-    {
-      "cardValueMappingContract": "",
-      "boxId": "",
-      "txId": ""
-    }
-  ],
+  "cardValueMappingIssuanceBox": {
+    "cardValueMappingIssuanceContract": "",
+    "cardValueMappingTokenId": "",
+    "boxId": "",
+    "txId": ""
+  },
+  "cardValueMappingBoxes": {
+    "cardValueMappingContract": "",
+    "txId": ""
+  },
   "playerProxyBox": {
     "playerProxyContract": ""
   }

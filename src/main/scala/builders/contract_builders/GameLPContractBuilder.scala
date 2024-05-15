@@ -31,7 +31,7 @@ case class GameLPContractBuilder(
               .item("$CardValueMappingContractBytes", cardValueMappingContractBytes.getValue)
               .item("$DevPKGE", devPKGE.getValue)
               .item("$DevAddress", devAddress.getValue)
-              .item("$TradeInFeeAddress", tradeInFeeAddress)
+              .item("$TradeInFeeAddress", tradeInFeeAddress.getValue)
               .item("$SetCreationMultiSigThreshold", setCreationMultiSigThreshold)
               .item("$SetCreationMultiSigAddressesGE", setCreationMultiSigAddressesGE.getValue)
               .build(),
@@ -46,7 +46,7 @@ object GameLPContractBuilder {
 
     def apply(setupConfig: TradeInSetupConfig, reportConfig: TradeInReportConfig): GameLPContractBuilder = {
 
-        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes(0).cardValueMappingContract).toPropositionBytes)
+        val cardValueMappingContract: ErgoValue[Coll[java.lang.Byte]] = ErgoValue.of(Address.create(reportConfig.cardValueMappingBoxes.cardValueMappingContract).toPropositionBytes)
 
         val devPKGE: ErgoValue[GroupElement] = ErgoValue.of(Address.createEip3Address(
             setupConfig.node.wallet.index,

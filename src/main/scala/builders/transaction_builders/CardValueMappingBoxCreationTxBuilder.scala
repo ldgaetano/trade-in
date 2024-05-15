@@ -73,13 +73,7 @@ object CardValueMappingBoxCreationTxBuilder {
 
       cardValueMappingBoxes = cardValueMappingBoxes ++ Array(cardValueMappingBox)
 
-      // update the report object
-      reportConfig.cardValueMappingBoxes(i).cardValueMappingContract = mappingBoxContract.getErgoTree.bytesHex
-
     }
-    // write to the report
-    TradeInReportConfig.write(TradeInUtils.TRADEIN_REPORT_CONFIG_FILE_PATH, reportConfig)
-
 
     // get the game lp box output
     val gameLPBoxOut = GameLPBoxBuilder(gameLPBox).get.toOutBox(txBuilder.outBoxBuilder())
